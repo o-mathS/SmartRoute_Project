@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartRoute - Login ou Registro</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; }
+        .container { max-width: 350px; margin: 80px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+        h2 { text-align: center; }
+        form { display: flex; flex-direction: column; }
+        input { margin-bottom: 12px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px; border: none; background: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .toggle { text-align: center; margin-top: 10px; }
+        .toggle a { color: #007bff; cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="titulo">Login</h2>
+        <form id="formLogin" onsubmit="fazerLogin(event)">
+            <input type="text" id="loginUsuario" placeholder="Usuário" required>
+            <input type="password" id="loginSenha" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <form id="formRegistro" style="display:none;" onsubmit="fazerRegistro(event)">
+            <input type="text" id="registroUsuario" placeholder="Usuário" required>
+            <input type="password" id="registroSenha" placeholder="Senha" required>
+            <input type="password" id="registroSenha2" placeholder="Confirme a senha" required>
+            <button type="submit">Registrar</button>
+        </form>
+        <div class="toggle">
+            <span id="toggleTexto">Não tem conta?</span>
+            <a onclick="alternarForm()">Registrar</a>
+        </div>
+    </div>
+    <script>
+        function alternarForm() {
+            const login = document.getElementById('formLogin');
+            const registro = document.getElementById('formRegistro');
+            const titulo = document.getElementById('titulo');
+            const toggleTexto = document.getElementById('toggleTexto');
+            const toggleLink = document.querySelector('.toggle a');
+            if (login.style.display !== 'none') {
+                login.style.display = 'none';
+                registro.style.display = 'flex';
+                titulo.innerText = 'Registro';
+                toggleTexto.innerText = 'Já tem conta?';
+                toggleLink.innerText = 'Login';
+            } else {
+                login.style.display = 'flex';
+                registro.style.display = 'none';
+                titulo.innerText = 'Login';
+                toggleTexto.innerText = 'Não tem conta?';
+                toggleLink.innerText = 'Registrar';
+            }
+        }
+
+        function fazerLogin(event) {
+            event.preventDefault();
+            // Aqui você pode implementar a lógica de autenticação
+            // alert('Login simulado!');
+            window.location.href = 'entregas.html';
+        }
+
+        function fazerRegistro(event) {
+            event.preventDefault();
+            const senha = document.getElementById('registroSenha').value;
+            const senha2 = document.getElementById('registroSenha2').value;
+            if (senha !== senha2) {
+                alert('As senhas não coincidem!');
+                return;
+            }
+            // Aqui você pode implementar a lógica de registro
+            // alert('Registro simulado!');
+            window.location.href = 'entregas.html';
+        }
+    </script>
+</body>
+</html>

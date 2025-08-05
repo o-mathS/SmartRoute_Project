@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD de Entregas</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #eee; }
+        .actions button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Entregas</h2>
+    <button onclick="abrirFormulario()">Adicionar Entrega</button>
+    <button onclick="calcularRota()">Calcular Rota</button>
+    <input type="text" id="busca" placeholder="Buscar..." oninput="filtrarEntregas()">
+
+    <table id="tabelaEntregas">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Endereço</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Linhas de entregas aqui -->
+        </tbody>
+    </table>
+
+    <!-- Formulário modal para criar/editar entrega -->
+    <div id="formularioModal" style="display:none; position:fixed; top:20%; left:35%; background:#fff; border:1px solid #ccc; padding:20px;">
+        <h3 id="tituloFormulario">Nova Entrega</h3>
+        <form id="formEntrega" onsubmit="salvarEntrega(event)">
+            <input type="hidden" id="indiceEdicao">
+            <label>Nome: <input type="text" id="nome" required></label><br>
+            <label>Endereço: <input type="text" id="endereco" required></label><br>
+            <label>Latitude: <input type="text" id="lat" required></label><br>
+            <label>Longitude: <input type="text" id="lng" required></label><br>
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="fecharFormulario()">Cancelar</button>
+        </form>
+    </div>
+
+    <script>
+        let entregas = [];
+
+        function abrirFormulario(indice = null) {
+            document.getElementById('formularioModal').style.display = 'block';
+            document.getElementById('formEntrega').reset();
+            document.getElementById('indiceEdicao').value = '';
+            document.getElementById('tituloFormulario').innerText = 'Nova Entrega';
+            if (indice !== null) {
+                let entrega = entregas[indice];
+                document.getElementById('nome').value = entrega.nome;
+                document.getElementById('endereco').value = entrega.endereco;
+                document.getElementById('lat').value = entrega.lat;
+                document.getElementById('lng').value = entrega.lng;
+                document.getElementById('indiceEdicao').value = indice;
+                document.getElementById('tituloFormulario').innerText = 'Editar Entrega';
+            }
+        }
+
+        function fecharFormulario() {
+            document.getElementById('formularioModal').style.display = 'none';
+        }
+
+        function salvarEntrega(event) {
+            event.preventDefault();
+            let nome = document.getElementById('nome').value;
+            let endereco = document.getElementById('endereco').value;
+            let lat = document.getElementById('lat').value;
+            let lng = document.getElementById('lng').value;
+            let indice = document.getElementById('indiceEdicao').value;
+
+            if (indice === '') {
+                entregas.push({ nome, endereco, lat, lng });
+            } else {
+                entregas[indice] = { nome, endereco, lat, lng };
+            }
+            fecharFormulario();
+            renderizarTabela();
+        }
+
+        function editarEntrega(indice) {
+            abrirFormulario(indice);
+        }
+
+        function excluirEntrega(indice) {
+            if (confirm('Deseja excluir esta entrega?')) {
+                entregas.splice(indice, 1);
+                renderizarTabela();
+            }
+        }
+
+        function renderizarTabela() {
+            let tbody = document.querySelector('#tabelaEntregas tbody');
+            tbody.innerHTML = '';
+            let busca = document.getElementById('busca').value.toLowerCase();
+            entregas.forEach((entrega, i) => {
+                if (
+                    entrega.nome.toLowerCase().includes(busca) ||
+                    entrega.endereco.toLowerCase().includes(busca)
+                ) {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${entrega.nome}</td>
+                        <td>${entrega.endereco}</td>
+                        <td>${entrega.lat}</td>
+                        <td>${entrega.lng}</td>
+                        <td class="actions">
+                            <button onclick="editarEntrega(${i}); event.stopPropagation();">Editar</button>
+                            <button onclick="excluirEntrega(${i}); event.stopPropagation();">Excluir</button>
+                        </td>
+                    `;
+                    // Adiciona o evento de clique na linha
+                    tr.onclick = function() {
+                        // Salva a entrega selecionada no localStorage
+                        localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
+                        window.location.href = 'rotas.html';
+                    };
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function filtrarEntregas() {
+            renderizarTabela();
+        }
+
+        function calcularRota() {
+            // Aqui você pode enviar as entregas para o backend para calcular a rota
+            alert('Função de cálculo de rota não implementada neste exemplo.');
+        }
+
+        // Inicializa tabela vazia
+        renderizarTabela();
+    </script>
+</body>
+</html>
