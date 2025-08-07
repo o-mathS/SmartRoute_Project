@@ -2,67 +2,173 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>SmartRoute - Login ou Registro</title>
+    <title>SmartRoute - Login</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; }
-        .container { max-width: 350px; margin: 80px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
-        h2 { text-align: center; }
-        form { display: flex; flex-direction: column; }
-        input { margin-bottom: 12px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px; border: none; background: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .toggle { text-align: center; margin-top: 10px; }
-        .toggle a { color: #007bff; cursor: pointer; text-decoration: underline; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #ECEBEA;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header, footer {
+            width: 100%;
+            height: 32px;
+            background: #27017D;
+        }
+        .main {
+            flex: 1;
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+        .left-panel {
+            background: #ECEBEA;
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 32px;
+        }
+        .logo-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .logo {
+            width: 20vh;
+            height: 20vh;
+            margin-right: 18px;
+        }
+        .brand-text {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #333;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #222;
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 4px;
+            margin-top: 10px;
+            color: #444;
+        }
+        input {
+            margin-bottom: 14px;
+            padding: 10px;
+            border: 1px solid #bdbdbd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background: #f4f4f4;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            background: #141A02;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #4c5d10;
+        }
+        .register-link {
+            font-size: 0.95rem;
+            text-align: center;
+            margin-top: 8px;
+            color: #444;
+        }
+        .register-link a {
+            color: #7bbf32;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .right-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .truck-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        @media (max-width: 900px) {
+            .main { flex-direction: column; }
+            .left-panel { width: 100%; min-width: 0; }
+            .right-panel { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 id="titulo">Login</h2>
-        <form id="formLogin" onsubmit="fazerLogin(event)">
-            <input type="text" id="loginUsuario" placeholder="Usuário" required>
-            <input type="password" id="loginSenha" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
-        <form id="formRegistro" style="display:none;" onsubmit="fazerRegistro(event)">
-            <input type="text" id="registroUsuario" placeholder="Usuário" required>
-            <input type="password" id="registroSenha" placeholder="Senha" required>
-            <input type="password" id="registroSenha2" placeholder="Confirme a senha" required>
-            <button type="submit">Registrar</button>
-        </form>
-        <div class="toggle">
-            <span id="toggleTexto">Não tem conta?</span>
-            <a onclick="alternarForm()">Registrar</a>
+    <header></header>
+    <div class="main">
+        <div class="left-panel">
+            <div class="logo-group">
+                <img src="logo.png" alt="Smart Route Logo" class="logo">
+            </div>
+            <div class="login-title">Log In</div>
+            <form id="formLogin" onsubmit="fazerLogin(event)">
+                <label for="loginUsuario">Usuário</label>
+                <input type="text" id="loginUsuario" placeholder="Usuário" required>
+                <label for="loginSenha">Senha</label>
+                <input type="password" id="loginSenha" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <div class="register-link">
+                Se ainda não tiver uma conta, <a onclick="alternarForm()">cadastre-se</a>
+            </div>
+            <form id="formRegistro" style="display:none; margin-top:20px;" onsubmit="fazerRegistro(event)">
+                <label for="registroUsuario">Usuário</label>
+                <input type="text" id="registroUsuario" placeholder="Usuário" required>
+                <label for="registroSenha">Senha</label>
+                <input type="password" id="registroSenha" placeholder="Senha" required>
+                <label for="registroSenha2">Confirme a senha</label>
+                <input type="password" id="registroSenha2" placeholder="Confirme a senha" required>
+                <button type="submit">Registrar</button>
+                <div class="register-link">
+                    Já tem conta? <a onclick="alternarForm()">Entrar</a>
+                </div>
+            </form>
+        </div>
+        <div class="right-panel">
+            <img src="truck2.jpg" alt="Caminhão" class="truck-img">
         </div>
     </div>
+    <footer></footer>
     <script>
         function alternarForm() {
             const login = document.getElementById('formLogin');
             const registro = document.getElementById('formRegistro');
-            const titulo = document.getElementById('titulo');
-            const toggleTexto = document.getElementById('toggleTexto');
-            const toggleLink = document.querySelector('.toggle a');
             if (login.style.display !== 'none') {
                 login.style.display = 'none';
-                registro.style.display = 'flex';
-                titulo.innerText = 'Registro';
-                toggleTexto.innerText = 'Já tem conta?';
-                toggleLink.innerText = 'Login';
+                registro.style.display = 'block';
             } else {
-                login.style.display = 'flex';
+                login.style.display = 'block';
                 registro.style.display = 'none';
-                titulo.innerText = 'Login';
-                toggleTexto.innerText = 'Não tem conta?';
-                toggleLink.innerText = 'Registrar';
             }
         }
-
         function fazerLogin(event) {
             event.preventDefault();
-            // Aqui você pode implementar a lógica de autenticação
-            // alert('Login simulado!');
             window.location.href = 'entregas.html';
         }
-
         function fazerRegistro(event) {
             event.preventDefault();
             const senha = document.getElementById('registroSenha').value;
@@ -71,8 +177,6 @@
                 alert('As senhas não coincidem!');
                 return;
             }
-            // Aqui você pode implementar a lógica de registro
-            // alert('Registro simulado!');
             window.location.href = 'entregas.html';
         }
     </script>
