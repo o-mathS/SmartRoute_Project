@@ -27,6 +27,24 @@
         let marcadores = [];
         let linhas = [];
 
+        // Adiciona marcador da entrega selecionada ao carregar a página
+        window.addEventListener('DOMContentLoaded', function() {
+            let entregaSelecionada = localStorage.getItem('entregaSelecionada');
+            if (entregaSelecionada) {
+                try {
+                    let entrega = JSON.parse(entregaSelecionada);
+                    if (entrega.lat && entrega.lng) {
+                        let lat = parseFloat(entrega.lat);
+                        let lng = parseFloat(entrega.lng);
+                        let marker = L.marker([lat, lng]).addTo(map);
+                        marcadores.push(marker);
+                        pontos.push({ lat, lng });
+                        map.setView([lat, lng], 14); // Centraliza no ponto
+                    }
+                } catch (e) { /* ignora erro de parse */ }
+            }
+        });
+
         map.on('click', function (e) {
             let coord = { lat: e.latlng.lat, lng: e.latlng.lng };
             pontos.push(coord);
