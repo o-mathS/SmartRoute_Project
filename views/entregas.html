@@ -91,6 +91,15 @@
             margin-bottom: 8px;
             display: inline-block;
         }
+        .card-status-done {
+            background: #d1ffd1;
+            color: #1a7a1a;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
         .card-actions button {
             margin-right: 8px;
             border: none;
@@ -124,8 +133,13 @@
     <div class="main-content">
         <button class="add-btn" onclick="abrirFormulario()">+</button>
         <input type="text" id="busca" placeholder="Buscar..." oninput="filtrarEntregas()" style="margin-bottom:20px; width:220px; padding:6px;">
+        <h3 style="margin-top:30px;">Fretes em andamento</h3>
         <div class="grid" id="gridEntregas">
-            <!-- Cards de entregas aqui -->
+            <!-- Cards de entregas abertas -->
+        </div>
+        <h3 style="margin-top:40px;">Fretes concluídos</h3>
+        <div class="grid" id="gridConcluidos">
+            <!-- Cards de entregas concluídas -->
         </div>
     </div>
 
@@ -195,8 +209,10 @@
         }
 
         function renderizarTabela() {
-            let grid = document.getElementById('gridEntregas');
-            grid.innerHTML = '';
+            let gridAbertos = document.getElementById('gridEntregas');
+            let gridConcluidos = document.getElementById('gridConcluidos');
+            gridAbertos.innerHTML = '';
+            gridConcluidos.innerHTML = '';
             let busca = document.getElementById('busca').value.toLowerCase();
             let abertos = 0;
             let concluidos = 0;
@@ -205,24 +221,55 @@
                     entrega.nome.toLowerCase().includes(busca) ||
                     entrega.endereco.toLowerCase().includes(busca)
                 ) {
-                    // Estado fictício para exemplo
                     let estado = entrega.estado || 'Em andamento';
-                    if (estado === 'Em andamento') abertos++;
-                    if (estado === 'Concluído') concluidos++;
                     let card = document.createElement('div');
-                    card.className = 'card';
+                    card.className = 'card' + (estado === 'Concluído' ? ' card-status-done' : '');
                     card.innerHTML = `
                         <div class="card-header">Frete #${i+1}</div>
                         <div>Endereço: ${entrega.endereco}</div>
-                        <div class="card-status">${estado}</div>
+                        <div class="${estado === 'Concluído' ? 'card-status-done' : 'card-status'}">${estado}</div>
                         <div class="card-actions">
                             <button onclick="editarEntrega(${i}); event.stopPropagation();">Editar</button>
                             <button class="cancel" onclick="excluirEntrega(${i}); event.stopPropagation();">Cancelar</button>
                             ${estado !== 'Concluído' ? `<button class="concluir" onclick="concluirEntrega(${i}); event.stopPropagation();">Concluir</button>` : ''}
                         </div>
                     `;
+                    card.onclick = function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
+                        window.location.href = '../views/rotas.html';
+                    };
+                    if (estado === 'Concluído') {
+                        concluidos++;
+                        gridConcluidos.appendChild(card);
+                    } else {
+                        abertos++;
+                        gridAbertos.appendChild(card);
+                    }
+                }
+            });
+            document.getElementById('fretesAbertos').innerText = abertos;
+            document.getElementById('fretesConcluidos').innerText = concluidos;
+            // Preenche grid com cards vazios para manter layout
+            let totalCardsAbertos = gridAbertos.children.length;
+            for (let j = totalCardsAbertos; j < 12; j++) {
+                let vazio = document.createElement('div');
+                vazio.className = 'card';
+                gridAbertos.appendChild(vazio);
+            }
+            let totalCardsConcluidos = gridConcluidos.children.length;
+            for (let j = totalCardsConcluidos; j < 4; j++) {
+                let vazio = document.createElement('div');
+                vazio.className = 'card card-status-done';
+                gridConcluidos.appendChild(vazio);
+            }
+        }
+
+        function filtrarEntregas() {
+            renderizarTabela();
+        }
+
         async function concluirEntrega(indice) {
-            // Remove o card da entrega e incrementa a contagem de concluídos
             let entrega = entregas[indice];
             // Se estiver usando API, atualiza no backend
             if (entrega.id) {
@@ -235,18 +282,12 @@
                         endereco: entrega.endereco,
                         lat: entrega.lat,
                         lng: entrega.lng,
-                vazio.className = 'card';
-                grid.appendChild(vazio);
+                        estado: 'Concluído'
+                    })
+                });
             }
-        }
-
-        function filtrarEntregas() {
+            entrega.estado = 'Concluído';
             renderizarTabela();
-        }
-
-        function calcularRota() {
-            // Aqui você pode enviar as entregas para o backend para calcular a rota
-            alert('Função de cálculo de rota não implementada neste exemplo.');
         }
 
         // Inicializa tabela vazia

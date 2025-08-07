@@ -1,12 +1,14 @@
 <?php
-// Arquivo de conexão com o banco de dados MySQL
+// Arquivo de conexão com o banco de dados MySQL usando PDO
 $host = 'localhost';
 $user = 'root';
 $pass = '';
 $db = 'smartroute';
 
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die('Erro de conexão: ' . $conn->connect_error);
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die('Erro de conexão: ' . $e->getMessage());
 }
 ?>
