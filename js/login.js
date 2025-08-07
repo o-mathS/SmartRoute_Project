@@ -11,7 +11,7 @@ function alternarForm() {
 }
 function fazerLogin(event) {
     event.preventDefault();
-    window.location.href = 'entregas.html';
+    window.location.href = '../views/entregas.html';
 }
 function fazerRegistro(event) {
     event.preventDefault();
@@ -21,5 +21,5 @@ function fazerRegistro(event) {
         alert('As senhas não coincidem!');
         return;
     }
-    window.location.href = 'entregas.html';
+    window.location.href = '../views/entregas.html';
 }
