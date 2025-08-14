@@ -34,7 +34,7 @@
                 }
             }
             ?>
-            <form id="formLogin" method="post" action="entregas.html">
+            <form id="formLogin" method="post" action="entregas.php">
                 <input type="text" name="loginUsuario" id="loginUsuario" placeholder="Usuário" required>
                 <input type="password" name="loginSenha" id="loginSenha" placeholder="Senha" required>
                 <button type="submit">Entrar</button>

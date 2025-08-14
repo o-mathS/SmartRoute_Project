@@ -73,7 +73,7 @@
           }
         }
       }
-      ?>
+      ?>z
       <form id="formEntrega" method="post" action="">
         <label>Nome: <input type="text" name="nome" id="nome" required /></label><br />
         <label>Ponto de Partida: <input type="text" name="endereco" id="endereco" required /></label><br />

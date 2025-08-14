@@ -2,7 +2,7 @@
 // Arquivo de conexão com o banco de dados MySQL usando PDO
 $host = 'localhost';
 $user = 'root';
-$pass = '';
+$pass = 'Home@spSENAI2025!';
 $db = 'smartroute';
 
 try {
