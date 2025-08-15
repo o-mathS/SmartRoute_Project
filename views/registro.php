@@ -50,7 +50,7 @@
                 <input type="password" name="registroSenha2" id="registroSenha2" placeholder="Confirme a senha" required>
                 <button type="submit">Registrar</button>
                 <div class="register-link">
-                    Já tem conta? <a href="index.html">Entrar</a>
+                    Já tem conta? <a href="index.php">Entrar</a>
                 </div>
                 <?php if (!empty($erro)): ?>
                     <div style="color:red; margin-top:10px;"> <?= $erro ?> </div>
