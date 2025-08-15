@@ -42,6 +42,9 @@
                     <div style="color:red; margin-top:10px;"> <?= $loginErro ?> </div>
                 <?php endif; ?>
             </form>
+            <div class="register-link" style="margin-top: 10px;">
+                Não possui uma conta? <a href="registro.php" style="color: #8CAA26; text-decoration: underline; font-weight: bold;">Cadastre-se aqui</a>.
+            </div>
            
         </div>
         <div class="right-panel">
