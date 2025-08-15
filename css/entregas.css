@@ -123,3 +123,33 @@ body {
     gap: 15px;
   }
 }
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.card-actions button {
+  flex: 1; /* faz os botões ocuparem espaço igual */
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card-actions button:hover {
+  opacity: 0.9;
+}
+
+.card-actions .rota-btn {
+  background-color: #1a7a1a; /* verde escuro */
+  color: #fff;
+}
+
+.card-actions .concluir-btn {
+  background-color: #d11a1a; /* vermelho */
+  color: #fff;
+}

@@ -5,48 +5,50 @@ require_once '../backend/conexao.php';
 $erro = '';
 $sucesso = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng'])) {
-    $nome = trim($_POST['nome']);
-    $endereco = trim($_POST['endereco']);
-    $lat = trim($_POST['lat']);
-    $lng = trim($_POST['lng']);
+  $nome = trim($_POST['nome']);
+  $endereco = trim($_POST['endereco']);
+  $lat = trim($_POST['lat']);
+  $lng = trim($_POST['lng']);
 
-    if (!$nome || !$endereco || !$lat || !$lng) {
-        $erro = 'Preencha todos os campos!';
+  if (!$nome || !$endereco || !$lat || !$lng) {
+    $erro = 'Preencha todos os campos!';
+  } else {
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng) VALUES (?, ?, ?, ?)');
+    $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng);
+    if ($stmt->execute()) {
+      $sucesso = true;
+      header("Location: entregas.php"); // reload para ver atualização
+      exit;
     } else {
-        $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng) VALUES (?, ?, ?, ?)');
-        $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng);
-        if ($stmt->execute()) {
-            $sucesso = true;
-            header("Location: entregas.php"); // reload para ver atualização
-            exit;
-        } else {
-            $erro = 'Erro ao salvar entrega: ' . $conn->error;
-        }
+      $erro = 'Erro ao salvar entrega: ' . $conn->error;
     }
+  }
 }
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <title>CRUD de Entregas</title>
   <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/entregas.css" />
 </head>
+
 <body>
   <div class="top-bar"></div>
   <div class="side-bar">
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
     <div class="monitoramento">
       Monitoramento de fretes em andamento:<br /><br />
-      <span>Fretes abertos:</span> 
+      <span>Fretes abertos:</span>
       <span id="fretesAbertos">
         <?php
         $countAbertos = $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Em andamento'")->fetch_assoc()['total'];
         echo $countAbertos;
         ?>
       </span><br />
-      <span>Fretes concluídos:</span> 
+      <span>Fretes concluídos:</span>
       <span id="fretesConcluidos">
         <?php
         $countConcluidos = $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'];
@@ -60,54 +62,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
 
     <h3 style="margin-top: 30px">Fretes em andamento</h3>
     <div class="grid" id="gridEntregas">
-<?php
-require_once '../backend/conexao.php';
+      <?php
+      require_once '../backend/conexao.php';
 
-// Consulta entregas "Em andamento"
-$sql = "SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC";
-$result = $conn->query($sql);
+      // Consulta entregas "Em andamento"
+      $sql = "SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC";
+      $result = $conn->query($sql);
 
-// Verifica se encontrou resultados
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        // Converte os dados da entrega para JSON e protege com ENT_QUOTES
-        $dadosEntrega = htmlspecialchars(json_encode([
+      // Verifica se encontrou resultados
+      if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+          // Dados da entrega para JSON
+          $dadosEntrega = htmlspecialchars(json_encode([
             'id' => $row['id'],
             'nome' => $row['nome'],
             'lat' => $row['lat'],
             'lng' => $row['lng']
-        ]), ENT_QUOTES, 'UTF-8');
+          ]), ENT_QUOTES, 'UTF-8');
 
-        echo '<div class="card">';
-        echo '<h3>' . htmlspecialchars($row['nome']) . '</h3>';
-        echo '<p><strong>Endereço:</strong> ' . htmlspecialchars($row['endereco']) . '</p>';
-        echo '<p><strong>Status:</strong> ' . htmlspecialchars($row['estado']) . '</p>';
+          echo '<div class="card">';
+          echo '<h3>' . htmlspecialchars($row['nome']) . '</h3>';
+          echo '<p><strong>Endereço:</strong> ' . htmlspecialchars($row['endereco']) . '</p>';
+          echo '<p><strong>Status:</strong> ' . htmlspecialchars($row['estado']) . '</p>';
 
-        // Botão para abrir a rota
-        echo "<button onclick='abrirRota($dadosEntrega)'>Ver rota</button>";
+          $dadosEntrega = htmlspecialchars(json_encode([
+            'id' => $row['id'],
+            'nome' => $row['nome'],
+            'lat' => $row['lat'],
+            'lng' => $row['lng']
+          ]), ENT_QUOTES, 'UTF-8');
 
-        echo '</div>';
-    }
-} else {
-    echo "<p>Nenhuma entrega em andamento.</p>";
-}
-?>
-</div>
+          echo '<div class="card-actions">';
+          echo "<button class='rota-btn' onclick='abrirRota($dadosEntrega)'>Ver Rota</button>";
+          echo "<form method='post' style='display:inline; flex:1;'>
+        <input type='hidden' name='concluir_id' value='" . $row['id'] . "' />
+        <button type='submit' class='concluir-btn'>Concluir</button>
+      </form>";
+          echo '</div>';
+          echo '</div>';
+        }
+      } else {
+        echo "<p>Nenhuma entrega em andamento.</p>";
+      }
+
+      // Lógica para concluir entrega
+      if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
+        $idConcluir = intval($_POST['concluir_id']);
+        $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído' WHERE id=?");
+        $stmt->bind_param("i", $idConcluir);
+        $stmt->execute();
+        $stmt->close();
+        // Atualiza a página para refletir a alteração
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+      }
+      ?>
+    </div>
 
     <h3 style="margin-top: 40px">Fretes concluídos</h3>
     <div class="grid" id="gridConcluidos">
       <?php
       $result = $conn->query("SELECT * FROM entregas WHERE estado = 'Concluído' ORDER BY id DESC");
       if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
-              echo "<div class='card card-status-done'>";
-              echo "<h3>" . htmlspecialchars($row['nome']) . "</h3>";
-              echo "<p><strong>Endereço:</strong> " . htmlspecialchars($row['endereco']) . "</p>";
-              echo "<p><strong>Status:</strong> " . htmlspecialchars($row['estado']) . "</p>";
-              echo "</div>";
-          }
+        while ($row = $result->fetch_assoc()) {
+          echo "<div class='card card-status-done'>";
+          echo "<h3>" . htmlspecialchars($row['nome']) . "</h3>";
+          echo "<p><strong>Endereço:</strong> " . htmlspecialchars($row['endereco']) . "</p>";
+          echo "<p><strong>Status:</strong> " . htmlspecialchars($row['estado']) . "</p>";
+          echo "</div>";
+        }
       } else {
-          echo "<p>Nenhuma entrega concluída.</p>";
+        echo "<p>Nenhuma entrega concluída.</p>";
       }
       ?>
     </div>
@@ -128,10 +153,11 @@ if ($result && $result->num_rows > 0) {
     <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
   </div>
   <script>
-function abrirRota(entrega) {
-    localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
-    window.location.href = 'rotas.html';
-}
-</script>
+    function abrirRota(entrega) {
+      localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
+      window.location.href = 'rotas.html';
+    }
+  </script>
 </body>
+
 </html>
