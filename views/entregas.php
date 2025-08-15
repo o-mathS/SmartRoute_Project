@@ -60,21 +60,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
 
     <h3 style="margin-top: 30px">Fretes em andamento</h3>
     <div class="grid" id="gridEntregas">
-      <?php
-      $result = $conn->query("SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC");
-      if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
-              echo "<div class='card'>";
-              echo "<h3>" . htmlspecialchars($row['nome']) . "</h3>";
-              echo "<p><strong>Endereço:</strong> " . htmlspecialchars($row['endereco']) . "</p>";
-              echo "<p><strong>Status:</strong> " . htmlspecialchars($row['estado']) . "</p>";
-              echo "</div>";
-          }
-      } else {
-          echo "<p>Nenhuma entrega em andamento.</p>";
-      }
-      ?>
-    </div>
+<?php
+require_once '../backend/conexao.php';
+
+// Consulta entregas "Em andamento"
+$sql = "SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC";
+$result = $conn->query($sql);
+
+// Verifica se encontrou resultados
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        // Converte os dados da entrega para JSON e protege com ENT_QUOTES
+        $dadosEntrega = htmlspecialchars(json_encode([
+            'id' => $row['id'],
+            'nome' => $row['nome'],
+            'lat' => $row['lat'],
+            'lng' => $row['lng']
+        ]), ENT_QUOTES, 'UTF-8');
+
+        echo '<div class="card">';
+        echo '<h3>' . htmlspecialchars($row['nome']) . '</h3>';
+        echo '<p><strong>Endereço:</strong> ' . htmlspecialchars($row['endereco']) . '</p>';
+        echo '<p><strong>Status:</strong> ' . htmlspecialchars($row['estado']) . '</p>';
+
+        // Botão para abrir a rota
+        echo "<button onclick='abrirRota($dadosEntrega)'>Ver rota</button>";
+
+        echo '</div>';
+    }
+} else {
+    echo "<p>Nenhuma entrega em andamento.</p>";
+}
+?>
+</div>
 
     <h3 style="margin-top: 40px">Fretes concluídos</h3>
     <div class="grid" id="gridConcluidos">
@@ -109,5 +127,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
     <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
     <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
   </div>
+  <script>
+function abrirRota(entrega) {
+    localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
+    window.location.href = 'rotas.html';
+}
+</script>
 </body>
 </html>
