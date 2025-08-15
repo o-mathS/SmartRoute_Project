@@ -16,8 +16,8 @@
       <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
       <div class="monitoramento">
         Monitoramento de fretes em andamento:<br /><br />
-        <span>Fretes abertos:</span> <span id="fretesAbertos">0</span><br />
-        <span>Fretes concluídos:</span> <span id="fretesConcluidos">0</span>
+        <span>Fretes abertos:</span> <span id="fretesAbertos"><?php echo isset($abertos) ? $abertos : 0; ?></span><br />
+<span>Fretes concluídos:</span> <span id="fretesConcluidos"><?php echo isset($concluidos) ? $concluidos : 0; ?></span>
       </div>
     </div>
     <div class="main-content">
@@ -30,12 +30,44 @@
         style="margin-bottom: 20px; width: 220px; padding: 6px"
       />
       <h3 style="margin-top: 30px">Fretes em andamento</h3>
+      <!-- Fretes em andamento -->
       <div class="grid" id="gridEntregas">
-        <!-- Cards de entregas abertas -->
+        <?php
+        include_once '../backend/conexao.php';
+        $stmt = $conn->query('SELECT * FROM entregas ORDER BY id DESC');
+        $abertos = 0;
+        while ($entrega = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $estado = isset($entrega['estado']) && $entrega['estado'] === 'Concluído' ? 'Concluído' : 'Em andamento';
+          if ($estado === 'Em andamento') {
+            $abertos++;
+            echo '<div class="card">';
+            echo '<div class="card-header">Frete #' . $entrega['id'] . '</div>';
+            echo '<div>Endereço: ' . htmlspecialchars($entrega['endereco']) . '</div>';
+            echo '<div class="' . ($estado === 'Concluído' ? 'card-status-done' : 'card-status') . '">' . $estado . '</div>';
+            echo '</div>';
+          }
+        }
+        ?>
       </div>
+
       <h3 style="margin-top: 40px">Fretes concluídos</h3>
+      <!-- Fretes concluídos -->
       <div class="grid" id="gridConcluidos">
-        <!-- Cards de entregas concluídas -->
+        <?php
+        $stmt = $conn->query('SELECT * FROM entregas ORDER BY id DESC');
+        $concluidos = 0;
+        while ($entrega = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $estado = isset($entrega['estado']) && $entrega['estado'] === 'Concluído' ? 'Concluído' : 'Em andamento';
+          if ($estado === 'Concluído') {
+            $concluidos++;
+            echo '<div class="card card-status-done">';
+            echo '<div class="card-header">Frete #' . $entrega['id'] . '</div>';
+            echo '<div>Endereço: ' . htmlspecialchars($entrega['endereco']) . '</div>';
+            echo '<div class="card-status-done">Concluído</div>';
+            echo '</div>';
+          }
+        }
+        ?>
       </div>
     </div>
 
