@@ -25,6 +25,7 @@
                 include_once '../backend/conexao.php';
 
                 $usuario = isset($_POST['registroUsuario']) ? trim($_POST['registroUsuario']) : '';
+                $email = isset($_POST['registroEmail']) ? ($_POST['registroEmail']) : '';
                 $senha = isset($_POST['registroSenha']) ? $_POST['registroSenha'] : '';
                 $senha2 = isset($_POST['registroSenha2']) ? $_POST['registroSenha2'] : '';
 
@@ -34,18 +35,18 @@
                     $erro = 'As senhas não coincidem!';
                 } else {
                     // Verificar se usuário já existe
-                    $stmt = $conn->prepare('SELECT id FROM usuarios WHERE usuario = ?');
-                    $stmt->bind_param('s', $usuario);
+                    $stmt = $conn->prepare('SELECT email FROM usuarios WHERE email = ?');
+                    $stmt->bind_param('s', $email);
                     $stmt->execute();
                     $stmt->store_result();
 
                     if ($stmt->num_rows > 0) {
-                        $erro = 'Usuário já existe!';
+                        $erro = 'Ja foi encontrada uma conta com este email!';
                     } else {
                         // Inserir usuário
                         $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-                        $stmt = $conn->prepare('INSERT INTO usuarios (usuario, senha) VALUES (?, ?)');
-                        $stmt->bind_param('ss', $usuario, $senha_hash);
+                        $stmt = $conn->prepare('INSERT INTO usuarios (usuario, senha, email) VALUES (?, ?, ?)');
+                        $stmt->bind_param('sss', $usuario, $senha_hash, $email);
 
                         if ($stmt->execute()) {
                             $sucesso = true;
@@ -59,6 +60,7 @@
             ?>
             <form id="formRegistro" method="post" action="registro.php">
                 <input type="text" name="registroUsuario" id="registroUsuario" placeholder="Usuário" required>
+                <input type="email" name="registroEmail" id="registroEmail" placeholder="Email" required>
                 <input type="password" name="registroSenha" id="registroSenha" placeholder="Senha" required>
                 <input type="password" name="registroSenha2" id="registroSenha2" placeholder="Confirme a senha" required>
                 <button type="submit">Registrar</button>
@@ -68,7 +70,7 @@
                 <?php if (!empty($erro)): ?>
                     <div style="color:red; margin-top:10px;"> <?= $erro ?> </div>
                 <?php elseif ($sucesso): ?>
-                    <div style="color:green; margin-top:10px;"> Usuário cadastrado com sucesso! <a href="index.html">Clique para entrar</a></div>
+                    <div style="color:green; margin-top:10px;"> Usuário cadastrado com sucesso! </div>
                 <?php endif; ?>
             </form>
         </div>
