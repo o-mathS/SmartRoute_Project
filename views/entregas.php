@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -38,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
 <body>
   <div class="top-bar"></div>
   <div class="side-bar">
+
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
     <div class="monitoramento">
       Monitoramento de fretes em andamento:<br /><br />
@@ -56,9 +58,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
         ?>
       </span>
     </div>
+    <!-- Botão de Logout -->
+    <form method="post" action="logout.php" style=" margin-top: 20px;">
+      <button type="submit" style="
+        position: absolute;
+        top: 860px;
+        left: 80px;
+        padding: 10px 20px;
+        background-color: #d11a1a;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';
+      " title="Sair do sistema
+    ">Sair</button>
+    </form>
+
   </div>
   <div class="main-content">
     <button class="add-btn" onclick="document.getElementById('formularioModal').style.display='block'">+</button>
+    <h2>Gerenciamento de Entregas</h2>
+    <p>Adicione, visualize e gerencie suas entregas de forma simples e rápida.</p>
 
     <h3 style="margin-top: 30px">Fretes em andamento</h3>
     <div class="grid" id="gridEntregas">
