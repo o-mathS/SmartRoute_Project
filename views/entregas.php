@@ -117,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
 
           echo '<div class="card-actions">';
           echo "<button class='rota-btn' onclick='abrirRota($dadosEntrega)'>Ver Rota</button>";
+          echo "<button class='remover-btn' onclick='if(confirm(\"Deseja remover esta entrega?\")) { window.location.href=\"../backend/remover_entrega.php?id=" . $row['id'] . "\"; }'>Remover</button>";
           echo "<form method='post' style='display:inline; flex:1;'>
         <input type='hidden' name='concluir_id' value='" . $row['id'] . "' />
         <button type='submit' class='concluir-btn'>Concluir</button>

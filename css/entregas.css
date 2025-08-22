@@ -135,11 +135,16 @@ body {
 }
 
 .card-actions .rota-btn {
-  background-color: #1a7a1a; /* verde escuro */
+  background-color: #3f0d71;
   color: #fff;
 }
 
 .card-actions .concluir-btn {
-  background-color: #d11a1a; /* vermelho */
+  background-color: #ade236; 
+  color: #fff;
+}
+
+.card-actions .remover-btn {
+  background-color: #d11a1a;
   color: #fff;
 }
