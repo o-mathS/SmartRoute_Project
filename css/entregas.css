@@ -104,16 +104,6 @@ body {
 .card-actions .cancel {
   color: #d11a1a;
 }
-#formularioModal {
-  display: none;
-  position: fixed;
-  top: 20%;
-  left: 35%;
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 20px;
-  z-index: 100;
-}
 @media (max-width: 900px) {
   .main-content {
     padding: 10px;

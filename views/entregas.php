@@ -162,15 +162,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   </div>
 
   <!-- Formulário modal -->
-  <div id="formularioModal" style="display:none; position: fixed; top: 20%; left: 35%; background: #fff; border: 1px solid #ccc; padding: 20px;">
+  <div id="formularioModal" style="
+  display: none;
+  position: fixed;
+  top: 20%;
+  left: 35%;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 100;
+  font-family:  Sofia Sans, Arial, sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 30%;
+  min-width: 300px;
+  ">
     <h3>Nova Entrega</h3>
-    <form method="post">
-      <label>Nome: <input type="text" name="nome" required></label><br>
-      <label>Endereço: <input type="text" name="endereco" required></label><br>
-      <label>Latitude: <input type="text" name="lat" required></label><br>
-      <label>Longitude: <input type="text" name="lng" required></label><br>
-      <button type="submit">Salvar</button>
-      <button type="button" onclick="document.getElementById('formularioModal').style.display='none'">Cancelar</button>
+    <form method="post" style="width: 80%;" action="entregas.php">
+      <p>Preencha os dados da entrega:</p>
+      <input type="text" name="nome" required placeholder="Nome" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o nome do destinatário"></label><br>
+      <input type="text" name="endereco" required placeholder="Endereço" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o endereço completo"></label><br>
+      <input type="text" name="lat" required placeholder="Latitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a latitude do local de entrega"></label><br>
+      <input type="text" name="lng" required placeholder="Longitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a longitude do local de entrega"></label><br>
+      <button type="submit" style="
+      margin-top: 10px;
+      background-color: #1a7a1a;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      " onmouseover="this.style.backgroundColor='#155a15';" onmouseout="this.style.backgroundColor='#1a7a1a';" title="Salvar entrega
+      ">Salvar</button>
+      <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="
+      background-color: #d11a1a;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';" title="Cancelar
+      ">Cancelar</button>
     </form>
     <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
     <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>

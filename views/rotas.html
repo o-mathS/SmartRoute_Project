@@ -1,186 +1,192 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Rota Otimizada</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        body {
-            margin: 0;
-            font-family: "Sofia Sans", Arial, sans-serif;
-            background: #f4f4f4;
-        }
+      body {
+        margin: 0;
+        font-family: "Sofia Sans", Arial, sans-serif;
+        background: #f4f4f4;
+      }
 
-        .top-bar {
-            width: 100%;
-            height: 30px;
-            background: #3c1173;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
+      .top-bar {
+        width: 100%;
+        height: 30px;
+        background: #3c1173;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+      }
 
-        .side-bar {
-            position: fixed;
-            top: 30px;
-            left: 0;
-            width: 220px;
-            height: calc(100vh - 30px);
-            background: #eaeaea;
-            border-right: 1px solid #ccc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 40px;
-        }
+      .side-bar {
+        position: fixed;
+        top: 30px;
+        left: 0;
+        width: 220px;
+        height: calc(100vh - 30px);
+        background: #eaeaea;
+        border-right: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 40px;
+      }
 
-        .logo {
-            width: 20vh;
-            margin-bottom: 30px;
-        }
+      .logo {
+        width: 20vh;
+        margin-bottom: 30px;
+      }
 
+      .main-content {
+        margin-left: 220px;
+        margin-top: 50px;
+        padding: 30px 40px;
+      }
+
+      h3 {
+        color: #3c1173;
+      }
+
+      #map {
+        height: 500px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+
+      .action-buttons {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        padding: 10px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+        color: #fff;
+        transition: 0.2s;
+      }
+
+      .action-buttons button:hover {
+        opacity: 0.9;
+      }
+
+      .calcular-btn {
+        background-color: #1a7a1a;
+      }
+
+      .limpar-btn {
+        background-color: #d11a1a;
+      }
+
+      @media (max-width: 900px) {
         .main-content {
-            margin-left: 220px;
-            margin-top: 50px;
-            padding: 30px 40px;
+          margin-left: 0;
+          margin-top: 60px;
+          padding: 10px;
         }
-
-        h3 {
-            color: #3c1173;
-        }
-
-        #map {
-            height: 500px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .action-buttons {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-buttons button {
-            flex: 1;
-            padding: 10px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            color: #fff;
-            transition: 0.2s;
-        }
-
-        .action-buttons button:hover {
-            opacity: 0.9;
-        }
-
-        .calcular-btn {
-            background-color: #1a7a1a;
-        }
-
-        .limpar-btn {
-            background-color: #d11a1a;
-        }
-
-        @media (max-width: 900px) {
-            .main-content {
-                margin-left: 0;
-                margin-top: 60px;
-                padding: 10px;
-            }
-        }
-        .monitoramento {
-            font-family: 'Sofia Sans', Arial, sans-serif;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #333;
-            text-align: center;
-        }
+      }
+      .monitoramento {
+        font-family: "Sofia Sans", Arial, sans-serif;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #333;
+        text-align: center;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="top-bar"></div>
 
     <div class="side-bar">
-        <img src="../assets/img/logo.png" class="logo" alt="Logo">
-        <div class="monitoramento"><span>Monitoramento:</span> Entregas em tempo real</div>
-        <!-- Pode adicionar mais links ou indicadores aqui -->
+      <img src="../assets/img/logo.png" class="logo" alt="Logo" />
+      <div class="monitoramento">
+        <span>Monitoramento:</span> Entregas em tempo real
+      </div>
+      <!-- Pode adicionar mais links ou indicadores aqui -->
     </div>
 
     <div class="main-content">
-        <h3>Mapa com Rota Otimizada</h3>
-        <div id="map"></div>
-        <div class="action-buttons">
-            <button class="calcular-btn" onclick="enviarPontos()">Calcular Rota</button>
-            <button class="limpar-btn" onclick="limparPontos()">Limpar Pontos</button>
-        </div>
+      <h3>Mapa com Rota Otimizada</h3>
+      <div id="map"></div>
+      <div class="action-buttons">
+        <button class="calcular-btn" onclick="enviarPontos()">
+          Calcular Rota
+        </button>
+        <button class="limpar-btn" onclick="limparPontos()">
+          Limpar Pontos
+        </button>
+      </div>
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        let map = L.map('map').setView([-23.55, -46.63], 12); // São Paulo
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      let map = L.map("map").setView([-23.55, -46.63], 12); // São Paulo
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+        map
+      );
 
-        let pontos = [];
-        let marcadores = [];
-        let linhas = [];
+      let pontos = [];
+      let marcadores = [];
+      let linhas = [];
 
-        window.addEventListener('DOMContentLoaded', function () {
-            let entregaSelecionada = localStorage.getItem('entregaSelecionada');
-            if (entregaSelecionada) {
-                try {
-                    let entrega = JSON.parse(entregaSelecionada);
-                    if (entrega.lat && entrega.lng) {
-                        let lat = parseFloat(entrega.lat);
-                        let lng = parseFloat(entrega.lng);
-                        let marker = L.marker([lat, lng]).addTo(map);
-                        marcadores.push(marker);
-                        pontos.push({ lat, lng });
-                        map.setView([lat, lng], 14);
-                    }
-                } catch (e) { }
+      window.addEventListener("DOMContentLoaded", function () {
+        let entregaSelecionada = localStorage.getItem("entregaSelecionada");
+        if (entregaSelecionada) {
+          try {
+            let entrega = JSON.parse(entregaSelecionada);
+            if (entrega.lat && entrega.lng) {
+              let lat = parseFloat(entrega.lat);
+              let lng = parseFloat(entrega.lng);
+              let marker = L.marker([lat, lng]).addTo(map);
+              marcadores.push(marker);
+              pontos.push({ lat, lng });
+              map.setView([lat, lng], 14);
             }
-        });
-
-        map.on('click', function (e) {
-            let coord = { lat: e.latlng.lat, lng: e.latlng.lng };
-            pontos.push(coord);
-            let marker = L.marker([coord.lat, coord.lng]).addTo(map);
-            marcadores.push(marker);
-        });
-
-        function enviarPontos() {
-            fetch('../backend/calcular_rota.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pontos)
-            })
-                .then(resp => resp.json())
-                .then(rota => {
-                    desenharLinha(rota.map(p => [p.lat, p.lng]));
-                });
+          } catch (e) {}
         }
+      });
 
-        function desenharLinha(rota) {
-            linhas.forEach(linha => map.removeLayer(linha));
-            linhas = [];
-            let polyline = L.polyline(rota, { color: 'blue' }).addTo(map);
-            linhas.push(polyline);
-        }
+      map.on("click", function (e) {
+        let coord = { lat: e.latlng.lat, lng: e.latlng.lng };
+        pontos.push(coord);
+        let marker = L.marker([coord.lat, coord.lng]).addTo(map);
+        marcadores.push(marker);
+      });
 
-        function limparPontos() {
-            marcadores.forEach(marker => map.removeLayer(marker));
-            marcadores = [];
-            linhas.forEach(linha => map.removeLayer(linha));
-            linhas = [];
-            pontos = [];
-        }
+      function enviarPontos() {
+        fetch("../backend/calcular_rota.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pontos),
+        })
+          .then((resp) => resp.json())
+          .then((rota) => {
+            desenharLinha(rota.map((p) => [p.lat, p.lng]));
+          });
+      }
+
+      function desenharLinha(rota) {
+        linhas.forEach((linha) => map.removeLayer(linha));
+        linhas = [];
+        let polyline = L.polyline(rota, { color: "blue" }).addTo(map);
+        linhas.push(polyline);
+      }
+
+      function limparPontos() {
+        marcadores.forEach((marker) => map.removeLayer(marker));
+        marcadores = [];
+        linhas.forEach((linha) => map.removeLayer(linha));
+        linhas = [];
+        pontos = [];
+      }
     </script>
-</body>
-
+  </body>
 </html>
