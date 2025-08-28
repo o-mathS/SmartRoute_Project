@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
   <title>CRUD de Entregas</title>
   <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/entregas.css" />
+
 </head>
 
 <body>
@@ -68,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
         echo $countConcluidos;
         ?>
       </span>
+    
     </div>
     <!-- Botão de Logout -->
     <form method="post" action="logout.php" style=" margin-top: 20px;">
