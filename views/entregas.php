@@ -57,6 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
         echo $countConcluidos;
         ?>
       </span>
+      <ul class="mini-menu-list">
+        <li>
+          <a href="../views/relatorios.php" class="menu-button">
+            <span class="mini-menu-icon">📊</span>
+            <span class="mini-menu-text">Relatórios</span>
+          </a>
+        </li>
+      </ul>
+
     </div>
     <!-- Botão de Logout -->
     <form method="post" action="logout.php" style=" margin-top: 20px;">
