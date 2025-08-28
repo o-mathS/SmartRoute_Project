@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <title>Rota Otimizada</title>
+    <!-- Fonte -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
       body {
@@ -11,6 +17,7 @@
         background: #f4f4f4;
       }
 
+      /* Top bar */
       .top-bar {
         width: 100%;
         height: 30px;
@@ -21,6 +28,7 @@
         z-index: 10;
       }
 
+      /* Sidebar */
       .side-bar {
         position: fixed;
         top: 30px;
@@ -33,6 +41,11 @@
         flex-direction: column;
         align-items: center;
         padding-top: 40px;
+        transition: transform 0.28s ease;
+      }
+
+      .side-bar.collapsed {
+        transform: translateX(-100%);
       }
 
       .logo {
@@ -40,14 +53,124 @@
         margin-bottom: 30px;
       }
 
+      .monitoramento {
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+      }
+
+      /* Mini menu */
+      .left-mini-menu {
+        width: 100%;
+        padding: 12px 8px;
+        box-sizing: border-box;
+      }
+
+      .mini-menu-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .mini-menu-item {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 8px;
+        color: #333;
+        text-decoration: none;
+      }
+
+      .mini-menu-item:hover {
+        background: linear-gradient(
+          90deg,
+          rgba(60, 17, 115, 0.06),
+          rgba(60, 17, 115, 0.03)
+        );
+        transform: translateX(4px);
+      }
+
+      .mini-menu-item.active {
+        background: #3c1173;
+        color: #fff;
+      }
+
+      .mini-menu-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .mini-menu-item.active .mini-menu-icon {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .mini-menu-text {
+        font-weight: 600;
+      }
+
+      .mini-menu-badge {
+        margin-left: auto;
+        background: #d11a1a;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+      }
+
+      /* Main content */
       .main-content {
         margin-left: 220px;
         margin-top: 50px;
         padding: 30px 40px;
+        transition: margin-left 0.28s ease;
       }
 
-      h3 {
-        color: #3c1173;
+      .side-bar.collapsed ~ .main-content {
+        margin-left: 0;
+      }
+
+      /* Menu hint */
+      .menu-hint {
+        position: fixed;
+        top: 6px;
+        left: 6px;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        background: #3c1173;
+        color: #fff;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 25;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      }
+
+      .side-bar.collapsed ~ .menu-hint {
+        display: flex;
+      }
+
+      /* Map + notícias */
+      .map-news-container {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        flex-wrap: wrap;
       }
 
       #map {
@@ -56,6 +179,67 @@
         border: 1px solid #ccc;
       }
 
+      .news-panel {
+        width: 320px;
+        max-height: 500px;
+        background: #fff;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        overflow-y: auto;
+      }
+
+      .news-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #3c1173;
+      }
+
+      .status-bar {
+        width: 100%;
+        height: 14px;
+        background: #f0f0f0;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 10px;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+
+      .status-segment {
+        height: 100%;
+        float: left;
+      }
+
+      .news-item {
+        padding: 8px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+      }
+
+      .news-item:hover {
+        background: #fbfbfb;
+      }
+
+      .news-title {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .severity-low {
+        color: #1a7a1a;
+      }
+      .severity-medium {
+        color: #c67a00;
+      }
+      .severity-high {
+        color: #d11a1a;
+      }
+
+      /* Action buttons */
       .action-buttons {
         margin-top: 15px;
         display: flex;
@@ -80,52 +264,137 @@
       .calcular-btn {
         background-color: #1a7a1a;
       }
-
       .limpar-btn {
         background-color: #d11a1a;
       }
 
+      /* Stats */
+      .stats-container {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .stat-card {
+        flex: 1;
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 80px;
+      }
+
+      .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #222;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #666;
+      }
+
+      /* Responsividade */
       @media (max-width: 900px) {
         .main-content {
           margin-left: 0;
           margin-top: 60px;
           padding: 10px;
         }
-      }
-      .monitoramento {
-        font-family: "Sofia Sans", Arial, sans-serif;
-        font-weight: bold;
-        margin-top: 20px;
-        color: #333;
-        text-align: center;
+        .map-news-container {
+          flex-direction: column;
+        }
+        .news-panel {
+          width: 100%;
+          max-height: 300px;
+        }
       }
     </style>
   </head>
-
   <body>
     <div class="top-bar"></div>
 
-    <div class="side-bar">
+    <div class="side-bar" id="sideBar">
       <img src="../assets/img/logo.png" class="logo" alt="Logo" />
       <div class="monitoramento">
         <span>Monitoramento:</span> Entregas em tempo real
       </div>
-      <!-- Pode adicionar mais links ou indicadores aqui -->
+      <!-- menu lateral estilizado -->
+      <nav class="left-mini-menu" aria-label="Atalhos rápidos">
+        <ul class="mini-menu-list">
+          <li>
+            <a href="../views/entregas.php" class="mini-menu-item active">
+              <span class="mini-menu-icon">🏠</span>
+              <span class="mini-menu-text">Início</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <div class="main-content">
+      <button class="menu-hint" id="menuHint" title="Abrir menu">≡</button>
       <h3>Mapa com Rota Otimizada</h3>
-      <div id="map"></div>
-      <div class="action-buttons">
-        <button class="calcular-btn" onclick="enviarPontos()">
-          Calcular Rota
-        </button>
-        <button class="limpar-btn" onclick="limparPontos()">
-          Limpar Pontos
-        </button>
+      <div class="map-news-container">
+        <div style="flex: 1">
+          <div id="map"></div>
+          <div class="action-buttons">
+            <button class="calcular-btn" onclick="enviarPontos()">
+              Calcular Rota
+            </button>
+            <button class="limpar-btn" onclick="limparPontos()">
+              Limpar Pontos
+            </button>
+          </div>
+        </div>
+        <aside class="news-panel" aria-label="Notícias de Trânsito">
+          <div class="news-header">
+            Notícias de Trânsito
+            <div style="display: flex; gap: 6px">
+              <button id="refreshNews" title="Atualizar notícias">⟳</button>
+              <button id="toggleDebug" title="Mostrar logs">Debug</button>
+            </div>
+          </div>
+          <div class="status-label">Status regional</div>
+          <div class="status-bar" aria-hidden="true">
+            <div
+              id="statusLow"
+              class="status-segment"
+              style="width: 33%; background: #dff2df"
+            ></div>
+            <div
+              id="statusMedium"
+              class="status-segment"
+              style="width: 33%; background: #fff0d6"
+            ></div>
+            <div
+              id="statusHigh"
+              class="status-segment"
+              style="width: 34%; background: #ffe6e6"
+            ></div>
+          </div>
+          <div id="newsList">
+            <div style="color: #666">Carregando notícias...</div>
+          </div>
+        </aside>
+      </div>
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-value" id="statHigh">0</div>
+          <div class="stat-label">Incidentes graves</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statUpdated">--</div>
+          <div class="stat-label">Última atualização</div>
+        </div>
       </div>
     </div>
 
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
       let map = L.map("map").setView([-23.55, -46.63], 12); // São Paulo
@@ -133,32 +402,14 @@
         map
       );
 
-      let pontos = [];
-      let marcadores = [];
-      let linhas = [];
+      let pontos = [],
+        marcadores = [],
+        linhas = [];
 
-      window.addEventListener("DOMContentLoaded", function () {
-        let entregaSelecionada = localStorage.getItem("entregaSelecionada");
-        if (entregaSelecionada) {
-          try {
-            let entrega = JSON.parse(entregaSelecionada);
-            if (entrega.lat && entrega.lng) {
-              let lat = parseFloat(entrega.lat);
-              let lng = parseFloat(entrega.lng);
-              let marker = L.marker([lat, lng]).addTo(map);
-              marcadores.push(marker);
-              pontos.push({ lat, lng });
-              map.setView([lat, lng], 14);
-            }
-          } catch (e) {}
-        }
-      });
-
-      map.on("click", function (e) {
-        let coord = { lat: e.latlng.lat, lng: e.latlng.lng };
+      map.on("click", (e) => {
+        const coord = { lat: e.latlng.lat, lng: e.latlng.lng };
         pontos.push(coord);
-        let marker = L.marker([coord.lat, coord.lng]).addTo(map);
-        marcadores.push(marker);
+        marcadores.push(L.marker([coord.lat, coord.lng]).addTo(map));
       });
 
       function enviarPontos() {
@@ -168,25 +419,32 @@
           body: JSON.stringify(pontos),
         })
           .then((resp) => resp.json())
-          .then((rota) => {
-            desenharLinha(rota.map((p) => [p.lat, p.lng]));
-          });
+          .then((rota) => desenharLinha(rota.map((p) => [p.lat, p.lng])));
       }
 
       function desenharLinha(rota) {
-        linhas.forEach((linha) => map.removeLayer(linha));
+        linhas.forEach((l) => map.removeLayer(l));
         linhas = [];
-        let polyline = L.polyline(rota, { color: "blue" }).addTo(map);
-        linhas.push(polyline);
+        linhas.push(L.polyline(rota, { color: "blue" }).addTo(map));
       }
 
       function limparPontos() {
-        marcadores.forEach((marker) => map.removeLayer(marker));
+        marcadores.forEach((m) => map.removeLayer(m));
+        linhas.forEach((l) => map.removeLayer(l));
         marcadores = [];
-        linhas.forEach((linha) => map.removeLayer(linha));
         linhas = [];
         pontos = [];
       }
+
+      // Mini menu ativo visual
+      document.querySelectorAll(".mini-menu-item").forEach((item) => {
+        item.addEventListener("click", function () {
+          document
+            .querySelectorAll(".mini-menu-item")
+            .forEach((i) => i.classList.remove("active"));
+          this.classList.add("active");
+        });
+      });
     </script>
   </body>
 </html>
