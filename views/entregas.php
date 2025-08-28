@@ -1,10 +1,10 @@
 <?php
 require_once '../backend/conexao.php';
 
-// Processa inserção
+// Processa inserção de nova entrega
 $erro = '';
 $sucesso = false;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng']) && !isset($_POST['concluir_id'])) {
   $nome = trim($_POST['nome']);
   $endereco = trim($_POST['endereco']);
   $lat = trim($_POST['lat']);
@@ -13,16 +13,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   if (!$nome || !$endereco || !$lat || !$lng) {
     $erro = 'Preencha todos os campos!';
   } else {
-    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng) VALUES (?, ?, ?, ?)');
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado) VALUES (?, ?, ?, ?, "Em andamento")');
     $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng);
     if ($stmt->execute()) {
       $sucesso = true;
-      header("Location: entregas.php"); // reload para ver atualização
+      header("Location: entregas.php"); // reload
       exit;
     } else {
       $erro = 'Erro ao salvar entrega: ' . $conn->error;
     }
   }
+}
+
+// Lógica para concluir entrega
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
+  $idConcluir = intval($_POST['concluir_id']);
+  $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_conclusao=NOW() WHERE id=?");
+  $stmt->bind_param("i", $idConcluir);
+  $stmt->execute();
+  $stmt->close();
+  header("Location: " . $_SERVER['PHP_SELF']);
+  exit;
 }
 ?>
 
@@ -92,10 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
       $sql = "SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC";
       $result = $conn->query($sql);
 
-      // Verifica se encontrou resultados
       if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-          // Dados da entrega para JSON
           $dadosEntrega = htmlspecialchars(json_encode([
             'id' => $row['id'],
             'nome' => $row['nome'],
@@ -108,37 +117,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
           echo '<p><strong>Endereço:</strong> ' . htmlspecialchars($row['endereco']) . '</p>';
           echo '<p><strong>Status:</strong> ' . htmlspecialchars($row['estado']) . '</p>';
 
-          $dadosEntrega = htmlspecialchars(json_encode([
-            'id' => $row['id'],
-            'nome' => $row['nome'],
-            'lat' => $row['lat'],
-            'lng' => $row['lng']
-          ]), ENT_QUOTES, 'UTF-8');
-
           echo '<div class="card-actions">';
           echo "<button class='rota-btn' onclick='abrirRota($dadosEntrega)'>Ver Rota</button>";
           echo "<button class='remover-btn' onclick='if(confirm(\"Deseja remover esta entrega?\")) { window.location.href=\"../backend/remover_entrega.php?id=" . $row['id'] . "\"; }'>Remover</button>";
           echo "<form method='post' style='display:inline; flex:1;'>
-        <input type='hidden' name='concluir_id' value='" . $row['id'] . "' />
-        <button type='submit' class='concluir-btn'>Concluir</button>
-      </form>";
+                  <input type='hidden' name='concluir_id' value='" . $row['id'] . "' />
+                  <button type='submit' class='concluir-btn'>Concluir</button>
+                </form>";
           echo '</div>';
           echo '</div>';
         }
       } else {
         echo "<p>Nenhuma entrega em andamento.</p>";
-      }
-
-      // Lógica para concluir entrega
-      if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
-        $idConcluir = intval($_POST['concluir_id']);
-        $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído' WHERE id=?");
-        $stmt->bind_param("i", $idConcluir);
-        $stmt->execute();
-        $stmt->close();
-        // Atualiza a página para refletir a alteração
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
       }
       ?>
     </div>
@@ -153,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
           echo "<h3>" . htmlspecialchars($row['nome']) . "</h3>";
           echo "<p><strong>Endereço:</strong> " . htmlspecialchars($row['endereco']) . "</p>";
           echo "<p><strong>Status:</strong> " . htmlspecialchars($row['estado']) . "</p>";
+          echo "<p><strong>Data de conclusão:</strong> " . htmlspecialchars($row['data_conclusao']) . "</p>";
           echo "</div>";
         }
       } else {
@@ -181,10 +172,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
     <h3>Nova Entrega</h3>
     <form method="post" style="width: 80%;" action="entregas.php">
       <p>Preencha os dados da entrega:</p>
-      <input type="text" name="nome" required placeholder="Nome" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o nome do destinatário"></label><br>
-      <input type="text" name="endereco" required placeholder="Endereço" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o endereço completo"></label><br>
-      <input type="text" name="lat" required placeholder="Latitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a latitude do local de entrega"></label><br>
-      <input type="text" name="lng" required placeholder="Longitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a longitude do local de entrega"></label><br>
+      <input type="text" name="nome" required placeholder="Nome" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o nome do destinatário"><br>
+      <input type="text" name="endereco" required placeholder="Endereço" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o endereço completo"><br>
+      <input type="text" name="lat" required placeholder="Latitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a latitude do local de entrega"><br>
+      <input type="text" name="lng" required placeholder="Longitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a longitude do local de entrega"><br>
       <button type="submit" style="
       margin-top: 10px;
       background-color: #1a7a1a;
