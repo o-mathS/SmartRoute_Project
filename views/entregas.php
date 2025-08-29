@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   if (!$nome || !$endereco || !$lat || !$lng) {
     $erro = 'Preencha todos os campos!';
   } else {
-    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado) VALUES (?, ?, ?, ?, "Agendada")');
-    $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng);
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega) VALUES (?, ?, ?, ?, "Agendada", ?)');
+    $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng, $_POST['data_entrega']);
     if ($stmt->execute()) {
       $sucesso = true;
       header("Location: entregas.php");
@@ -54,6 +54,9 @@ $result = $stmt->get_result();
   <title>SmartRoute - Entregas</title>
   <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/entregas.css" />
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
 </head>
 
 <body>
@@ -73,8 +76,8 @@ $result = $stmt->get_result();
     </nav>
   </div>
   <!-- Botão de Logout -->
-    <form method="post" action="logout.php" style=" margin-top: 20px;">
-      <button type="submit" style="
+  <form method="post" action="logout.php" style=" margin-top: 20px;">
+    <button type="submit" style="
         position: absolute;
         top: 860px;
         left: 80px;
@@ -89,7 +92,7 @@ $result = $stmt->get_result();
       " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';
       " title="Sair do sistema
     ">Sair</button>
-    </form>
+  </form>
 
   <div class="main-content">
     <button class="add-btn" onclick="document.getElementById('formularioModal').style.display='block'">+</button>
@@ -142,6 +145,8 @@ $result = $stmt->get_result();
       <input type="text" name="endereco" required placeholder="Endereço" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite o endereço completo"><br>
       <input type="text" name="lat" required placeholder="Latitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a latitude do local de entrega"><br>
       <input type="text" name="lng" required placeholder="Longitude" style="border: 1px solid #ccc; padding: 4px; margin: 5px; border-radius: 4px;width: 100%;box-sizing: border-box;" title="Digite a longitude do local de entrega"><br>
+      <input type="hidden" id="dataEntrega" name="data_entrega">
+      <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
       <button type="submit" style="
       margin-top: 10px;
       background-color: #1a7a1a;
@@ -165,16 +170,33 @@ $result = $stmt->get_result();
       transition: background-color 0.3s;
       " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';" title="Cancelar
       ">Cancelar</button>
-    <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
-    <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
+      <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
+      <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
   </div>
 
   <script>
-    function abrirRota(entrega) {
-      localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
-      window.location.href = 'rotas.html';
-    }
-  </script>
+let calendar; // global pra não recriar várias vezes
+
+function abrirFormulario() {
+  let modal = document.getElementById('formularioModal');
+  modal.style.display = 'block';
+
+  if (!calendar) {
+    let calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'pt-br',
+      selectable: true,
+      dateClick: function(info) {
+        document.getElementById('dataEntrega').value = info.dateStr;
+        alert("Data selecionada: " + info.dateStr);
+      }
+    });
+    calendar.render();
+  }
+}
+</script>
+
 </body>
 
 </html>
