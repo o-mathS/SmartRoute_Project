@@ -13,11 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   if (!$nome || !$endereco || !$lat || !$lng) {
     $erro = 'Preencha todos os campos!';
   } else {
-    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado) VALUES (?, ?, ?, ?, "Em andamento")');
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado) VALUES (?, ?, ?, ?, "Agendada")');
     $stmt->bind_param('ssss', $nome, $endereco, $lat, $lng);
     if ($stmt->execute()) {
       $sucesso = true;
-      header("Location: entregas.php"); // reload
+      header("Location: entregas.php");
       exit;
     } else {
       $erro = 'Erro ao salvar entrega: ' . $conn->error;
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
   }
 }
 
-// Lógica para concluir entrega
+// Concluir entrega
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
   $idConcluir = intval($_POST['concluir_id']);
   $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_conclusao=NOW() WHERE id=?");
@@ -35,6 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
   header("Location: " . $_SERVER['PHP_SELF']);
   exit;
 }
+
+// Status selecionado na aba
+$status = isset($_GET['status']) ? $_GET['status'] : 'Agendada';
+
+// Consulta entregas por status
+$stmt = $conn->prepare("SELECT * FROM entregas WHERE estado = ? ORDER BY id DESC");
+$stmt->bind_param("s", $status);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -42,145 +51,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
 
 <head>
   <meta charset="UTF-8" />
-  <title>CRUD de Entregas</title>
+  <title>SmartRoute - Entregas</title>
   <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/entregas.css" />
-
 </head>
 
 <body>
   <div class="top-bar"></div>
   <div class="side-bar">
-
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
     <div class="monitoramento">
-      Monitoramento de Fretes:<br /><br />
-      <span>Fretes abertos:</span>
-      <span id="fretesAbertos">
-        <?php
-        $countAbertos = $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Em andamento'")->fetch_assoc()['total'];
-        echo $countAbertos;
-        ?>
-      </span><br />
-      <span>Fretes concluídos:</span>
-      <span id="fretesConcluidos">
-        <?php
-        $countConcluidos = $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'];
-        echo $countConcluidos;
-        ?>
-      </span>
-
+      <span>📦 Fretes Abertos:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
+      <span>✅ Concluídos:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b>
     </div>
-    <nav class="left-mini-menu" aria-label="Atalhos rápidos">
+    <nav class="left-mini-menu">
       <ul class="mini-menu-list">
-        <li>
-          <a href="../views/relatorios.php" class="mini-menu-item">
-            <span class="mini-menu-icon">📊</span>
-            <span class="mini-menu-text">Relatórios</span>
-          </a>
-        </li>
+        <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
       </ul>
     </nav>
-    <!-- Botão de Logout -->
-    <form method="post" action="logout.php" style=" margin-top: 20px;">
-      <button type="submit" style="
-        position: absolute;
-        top: 860px;
-        left: 80px;
-        padding: 10px 20px;
-        background-color: #d11a1a;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.3s;
-      " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';
-      " title="Sair do sistema
-    ">Sair</button>
-    </form>
-
   </div>
+
   <div class="main-content">
     <button class="add-btn" onclick="document.getElementById('formularioModal').style.display='block'">+</button>
     <h2>Gerenciamento de Entregas</h2>
-    <p>Adicione, visualize e gerencie suas entregas de forma simples e rápida.</p>
+    <p>Adicione, visualize e gerencie suas entregas.</p>
 
-    <h3 style="margin-top: 30px">Fretes em andamento</h3>
-    <div class="grid" id="gridEntregas">
-      <?php
-      require_once '../backend/conexao.php';
-
-      // Consulta entregas "Em andamento"
-      $sql = "SELECT * FROM entregas WHERE estado = 'Em andamento' ORDER BY id DESC";
-      $result = $conn->query($sql);
-
-      if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          $dadosEntrega = htmlspecialchars(json_encode([
-            'id' => $row['id'],
-            'nome' => $row['nome'],
-            'lat' => $row['lat'],
-            'lng' => $row['lng']
-          ]), ENT_QUOTES, 'UTF-8');
-
-          echo '<div class="card">';
-          echo '<h3>' . htmlspecialchars($row['nome']) . '</h3>';
-          echo '<p><strong>Endereço:</strong> ' . htmlspecialchars($row['endereco']) . '</p>';
-          echo '<p><strong>Status:</strong> ' . htmlspecialchars($row['estado']) . '</p>';
-
-          echo '<div class="card-actions">';
-          echo "<button class='rota-btn' onclick='abrirRota($dadosEntrega)'>Ver Rota</button>";
-          echo "<button class='remover-btn' onclick='if(confirm(\"Deseja remover esta entrega?\")) { window.location.href=\"../backend/remover_entrega.php?id=" . $row['id'] . "\"; }'>Remover</button>";
-          echo "<form method='post' style='display:inline; flex:1;'>
-                  <input type='hidden' name='concluir_id' value='" . $row['id'] . "' />
-                  <button type='submit' class='concluir-btn'>Concluir</button>
-                </form>";
-          echo '</div>';
-          echo '</div>';
-        }
-      } else {
-        echo "<p>Nenhuma entrega em andamento.</p>";
-      }
-      ?>
+    <!-- Abas -->
+    <div class="tabs">
+      <a href="?status=Agendada" class="<?= $status == 'Agendada' ? 'active' : '' ?>">Agendadas</a>
+      <a href="?status=Em andamento" class="<?= $status == 'Em andamento' ? 'active' : '' ?>">Em andamento</a>
+      <a href="?status=Concluído" class="<?= $status == 'Concluído' ? 'active' : '' ?>">Concluídas</a>
+      <a href="?status=Cancelada" class="<?= $status == 'Cancelada' ? 'active' : '' ?>">Canceladas</a>
     </div>
 
-    <h3 style="margin-top: 40px">Fretes concluídos recentemente</h3>
-    <div class="grid" id="gridConcluidos">
-      <?php
-      $result = $conn->query("SELECT * FROM entregas WHERE estado = 'Concluído' ORDER BY id DESC");
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          echo "<div class='card card-status-done'>";
-          echo "<h3>" . htmlspecialchars($row['nome']) . "</h3>";
-          echo "<p><strong>Endereço:</strong> " . htmlspecialchars($row['endereco']) . "</p>";
-          echo "<p><strong>Status:</strong> " . htmlspecialchars($row['estado']) . "</p>";
-          echo "<p><strong>Data de conclusão:</strong> " . htmlspecialchars($row['data_conclusao']) . "</p>";
-          echo "</div>";
-        }
-      } else {
-        echo "<p>Nenhuma entrega concluída.</p>";
-      }
-      ?>
+    <!-- Lista de Entregas -->
+    <div class="grid">
+      <?php if ($result->num_rows > 0): ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
+          <div class="card<?= $row['estado'] === 'Concluído' ? ' card-concluida' : '' ?>">
+            <h3><?= htmlspecialchars($row['nome']) ?></h3>
+            <p><b>Endereço:</b> <?= htmlspecialchars($row['endereco']) ?></p>
+            <p><b>Status:</b> <?= htmlspecialchars($row['estado']) ?></p>
+            <?php if ($row['estado'] === 'Concluído'): ?>
+              <p><b>Data de Conclusão:</b> <?= htmlspecialchars($row['data_conclusao']) ?></p>
+            <?php endif; ?>
+            <div class="card-actions">
+              <?php if ($row['estado'] !== 'Concluído'): ?>
+                <button class="rota-btn" onclick='abrirRota(<?= json_encode($row) ?>)'>Ver Rota</button>
+                <button class="remover-btn" onclick='if(confirm("Deseja remover?")) window.location.href="../backend/remover_entrega.php?id=<?= $row['id'] ?>"'>Remover</button>
+                <form method="post" style="display:inline;">
+                  <input type="hidden" name="concluir_id" value="<?= $row['id'] ?>" />
+                  <button type="submit" class="concluir-btn">Concluir</button>
+                </form>
+              <?php endif; ?>
+            </div>
+          </div>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <p>Nenhuma entrega <?= strtolower($status) ?>.</p>
+      <?php endif; ?>
     </div>
   </div>
 
-  <!-- Formulário modal -->
-  <div id="formularioModal" style="
-  display: none;
-  position: fixed;
-  top: 20%;
-  left: 35%;
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 20px;
-  z-index: 100;
-  font-family:  Sofia Sans, Arial, sans-serif;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 30%;
-  min-width: 300px;
-  ">
+  <!-- Modal Nova Entrega -->
+  <div id="formularioModal" style="display:none;position:fixed;top:20%;left:35%;background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);width:30%;min-width:300px;">
     <h3>Nova Entrega</h3>
     <form method="post" style="width: 80%;" action="entregas.php">
       <p>Preencha os dados da entrega:</p>
@@ -211,10 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
       transition: background-color 0.3s;
       " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';" title="Cancelar
       ">Cancelar</button>
-    </form>
     <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
     <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
   </div>
+
   <script>
     function abrirRota(entrega) {
       localStorage.setItem('entregaSelecionada', JSON.stringify(entrega));
