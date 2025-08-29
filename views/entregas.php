@@ -72,6 +72,24 @@ $result = $stmt->get_result();
       </ul>
     </nav>
   </div>
+  <!-- Botão de Logout -->
+    <form method="post" action="logout.php" style=" margin-top: 20px;">
+      <button type="submit" style="
+        position: absolute;
+        top: 860px;
+        left: 80px;
+        padding: 10px 20px;
+        background-color: #d11a1a;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      " onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';
+      " title="Sair do sistema
+    ">Sair</button>
+    </form>
 
   <div class="main-content">
     <button class="add-btn" onclick="document.getElementById('formularioModal').style.display='block'">+</button>
