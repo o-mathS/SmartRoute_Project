@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
 
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
     <div class="monitoramento">
-      Monitoramento de fretes em andamento:<br /><br />
+      Monitoramento de Fretes:<br /><br />
       <span>Fretes abertos:</span>
       <span id="fretesAbertos">
         <?php
@@ -69,8 +69,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
         echo $countConcluidos;
         ?>
       </span>
-    
+
     </div>
+    <nav class="left-mini-menu" aria-label="Atalhos rápidos">
+      <ul class="mini-menu-list">
+        <li>
+          <a href="../views/relatorios.php" class="mini-menu-item">
+            <span class="mini-menu-icon">📊</span>
+            <span class="mini-menu-text">Relatórios</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
     <!-- Botão de Logout -->
     <form method="post" action="logout.php" style=" margin-top: 20px;">
       <button type="submit" style="
@@ -135,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
       ?>
     </div>
 
-    <h3 style="margin-top: 40px">Fretes concluídos</h3>
+    <h3 style="margin-top: 40px">Fretes concluídos recentemente</h3>
     <div class="grid" id="gridConcluidos">
       <?php
       $result = $conn->query("SELECT * FROM entregas WHERE estado = 'Concluído' ORDER BY id DESC");
@@ -183,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
       background-color: #1a7a1a;
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 5px 10px;  
       border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
