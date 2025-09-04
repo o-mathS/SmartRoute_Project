@@ -1,3 +1,6 @@
+<?php
+require_once '../backend/conexao.php';
+?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
