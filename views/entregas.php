@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
 // Concluir entrega
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
   $idConcluir = intval($_POST['concluir_id']);
-  $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_conclusao=NOW() WHERE id=?");
+  $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_entrega=NOW() WHERE id=?");
   $stmt->bind_param("i", $idConcluir);
   $stmt->execute();
   $stmt->close();
@@ -116,7 +116,7 @@ $result = $stmt->get_result();
             <p><b>Endereço:</b> <?= htmlspecialchars($row['endereco']) ?></p>
             <p><b>Status:</b> <?= htmlspecialchars($row['estado']) ?></p>
             <?php if ($row['estado'] === 'Concluído'): ?>
-              <p><b>Data de Conclusão:</b> <?= htmlspecialchars($row['data_conclusao']) ?></p>
+              <p><b>Data de Conclusão:</b> <?= htmlspecialchars($row['data_entrega']) ?></p>
             <?php endif; ?>
             <div class="card-actions">
               <?php if ($row['estado'] !== 'Concluído'): ?>

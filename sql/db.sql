@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS entregas (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
-ALTER TABLE entregas ADD COLUMN data_conclusao DATETIME NULL;
+ALTER TABLE entregas ADD COLUMN data_agendamento DATETIME NULL;
