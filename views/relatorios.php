@@ -1,6 +1,10 @@
 <?php
 require_once '../backend/conexao.php';
 ?>
+
+<?php
+require_once '../backend/conexao.php';
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
