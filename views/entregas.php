@@ -71,6 +71,7 @@ $result = $stmt->get_result();
     </div>
     <nav class="left-mini-menu">
       <ul class="mini-menu-list">
+        <li><a href="entregas.php" class="mini-menu-item"><span class="mini-menu-icon">📦</span>Entregas</a></li>
         <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
       </ul>
     </nav>
