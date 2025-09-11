@@ -7,7 +7,7 @@ $conn->query("
     WHERE estado = 'Agendada' 
     AND DATE(data_entrega) <= CURDATE()
 ");
-  
+
 
 // Processa inserção de nova entrega
 $erro = '';
@@ -64,6 +64,40 @@ $stmt = $conn->prepare("SELECT * FROM entregas WHERE estado = ? ORDER BY id DESC
 $stmt->bind_param("s", $status);
 $stmt->execute();
 $result = $stmt->get_result();
+
+function entregadorDisponivel($conn, $entregador_id, $data) {
+  $stmt = $conn->prepare("
+    SELECT COUNT(*) as total 
+    FROM entregas 
+    WHERE entregador_id = ? 
+      AND DATE(data_entrega) = DATE(?)
+      AND estado != 'Cancelada'
+  ");
+  $stmt->bind_param("is", $entregador_id, $data);
+  $stmt->execute();
+  $res = $stmt->get_result()->fetch_assoc();
+  return $res['total'] == 0;
+}
+
+// Na inserção da entrega
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entregador_id'])) {
+  $entregador_id = intval($_POST['entregador_id']);
+
+  if (!entregadorDisponivel($conn, $entregador_id, $dataEntrega)) {
+    $erro = "O entregador já possui entrega nesta data!";
+  } else {
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega, entregador_id) 
+                            VALUES (?, ?, ?, ?, "Agendada", ?, ?)');
+    $stmt->bind_param('sssssi', $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id);
+    if ($stmt->execute()) {
+      $sucesso = true;
+      header("Location: entregas.php");
+      exit;
+    } else {
+      $erro = 'Erro ao salvar entrega: ' . $conn->error;
+    }
+  }
+}
 ?>
 
 <!DOCTYPE html>

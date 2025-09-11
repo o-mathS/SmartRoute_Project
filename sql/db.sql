@@ -23,3 +23,16 @@ CREATE TABLE IF NOT EXISTS entregas (
     data_entrega DATE NULL,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
+
+-- Tabela de entregadores
+CREATE TABLE IF NOT EXISTS entregadores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    telefone VARCHAR(20)
+);
+
+-- Alterar tabela entregas para vincular entregador
+ALTER TABLE entregas
+ADD COLUMN entregador_id INT NULL,
+ADD FOREIGN KEY (entregador_id) REFERENCES entregadores(id);
