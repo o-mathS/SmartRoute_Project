@@ -1,6 +1,14 @@
 <?php
 require_once '../backend/conexao.php';
 
+$conn->query("
+    UPDATE entregas 
+    SET estado = 'Em andamento' 
+    WHERE estado = 'Agendada' 
+    AND DATE(data_entrega) <= CURDATE()
+");
+  
+
 // Processa inserção de nova entrega
 $erro = '';
 $sucesso = false;
@@ -80,16 +88,17 @@ $result = $stmt->get_result();
     .card-cancelada p {
       color: #a10000;
     }
-    .card-andamento{
+
+    .card-andamento {
       background-color: #fffde6ff;
       border-left: 6px solid #ccbe00ff;
       opacity: 0.95;
     }
+
     .card-andamento h3,
     .card-andamento p {
       color: #a19100ff;
     }
-    
   </style>
 </head>
 
@@ -115,7 +124,7 @@ $result = $stmt->get_result();
 
   <!-- Botão de Logout -->
   <form method="post" action="logout.php" style=" margin-top: 20px;">
-    <button type="submit" style="position: absolute;top: 860px;left: 80px;padding: 10px 20px;background-color: #d11a1a;color: white;border: none;border-radius: 5px;cursor: pointer;font-weight: bold;transition: background-color 0.3s;"
+    <button type="submit" style="position: fixed; top: 860px;left: 80px;padding: 10px 20px;background-color: #d11a1a;color: white;border: none;border-radius: 5px;cursor: pointer;font-weight: bold;transition: background-color 0.3s;"
       onmouseover="this.style.backgroundColor='#b00';" onmouseout="this.style.backgroundColor='#d11a1a';">Sair</button>
   </form>
 
@@ -211,6 +220,11 @@ $result = $stmt->get_result();
         });
         calendar.render();
       }
+    }
+
+    function abrirRota(entrega) {
+      const url = `rotas.html?lat=${encodeURIComponent(entrega.lat)}&lng=${encodeURIComponent(entrega.lng)}&endereco=${encodeURIComponent(entrega.endereco)}`;
+      window.location.href = url;
     }
   </script>
 

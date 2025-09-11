@@ -43,7 +43,7 @@ require_once '../backend/conexao.php';
   <!-- Botão de Logout -->
   <form method="post" action="logout.php" style=" margin-top: 20px;">
     <button type="submit" style="
-        position: absolute;
+        position: fixed;
         top: 860px;
         left: 80px;
         padding: 10px 20px;

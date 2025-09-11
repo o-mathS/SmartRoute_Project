@@ -445,6 +445,24 @@
           this.classList.add("active");
         });
       });
+
+      function getParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          lat: parseFloat(params.get("lat")),
+          lng: parseFloat(params.get("lng")),
+          endereco: params.get("endereco"),
+        };
+      }
+
+      const entrega = getParams();
+      if (!isNaN(entrega.lat) && !isNaN(entrega.lng)) {
+        map.setView([entrega.lat, entrega.lng], 14);
+        L.marker([entrega.lat, entrega.lng])
+          .addTo(map)
+          .bindPopup(`<b>Entrega</b><br>${entrega.endereco || ""}`)
+          .openPopup();
+      }
     </script>
   </body>
 </html>
