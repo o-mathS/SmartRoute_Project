@@ -12,27 +12,6 @@ require_once '../backend/conexao.php';
   <link rel="stylesheet" href="../css/entregas.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 10px 0 20px;
-    }
-
-    .filters .field {
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-    }
-
-    .filters input,
-    .filters select {
-      padding: 6px 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      min-width: 160px;
-    }
-
     .kpis {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -85,40 +64,6 @@ require_once '../backend/conexao.php';
 </head>
 
 <body>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<div class="top-bar"></div>
-<div class="side-bar">
-  <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
-  <div class="monitoramento">
-    <span>📦 Fretes Abertos:</span>
-    <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
-    <span>✅ Concluídos:</span>
-    <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b><br>
-    <span>❌ Cancelados:</span>
-    <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
-  </div>
-  <nav class="left-mini-menu">
-    <ul class="mini-menu-list">
-      <li><a href="entregas.php" class="mini-menu-item"><span class="mini-menu-icon">📦</span>Entregas</a></li>
-      <li><a href="relatorios.php" class="mini-menu-item active"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
-    </ul>
-  </nav>
-</div>
-<form method="post" action="logout.php" style=" margin-top: 20px;">
-  <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
-</form>
-
-<div class="main-content">
-  <h2>Dashboard – Relatórios e Gráficos</h2>
-
-  <!-- Filtros -->
-  <div class="filters">
-    <div class="field"><label>Início</label><input type="date" id="startDate"></div>
-    <div class="field"><label>Fim</label><input type="date" id="endDate"></div>
-    <div class="field"><label>Entregador</label>
-      <select id="entregadorFilter"><option value="">Todos</option></select>
-
   <div class="top-bar"></div>
   <div class="side-bar">
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
@@ -126,8 +71,7 @@ require_once '../backend/conexao.php';
       <span>📦 Fretes Abertos:</span>
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
       <span>✅ Concluídos:</span>
-<<<<<<< HEAD
-      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b><br>
       <span>❌ Cancelados:</span>
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
     </div>
@@ -138,12 +82,14 @@ require_once '../backend/conexao.php';
       </ul>
     </nav>
   </div>
-  <form method="post" action="logout.php" style=" margin-top: 20px;">
+
+  <form method="post" action="logout.php" style="margin-top: 20px;">
     <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
   </form>
 
   <div class="main-content">
     <h2>Dashboard – Relatórios e Gráficos</h2>
+
     <!-- KPIs -->
     <div class="kpis">
       <div class="kpi-card">
@@ -183,55 +129,128 @@ require_once '../backend/conexao.php';
 
     let chartStatus, chartLinha, chartEntregador;
 
+    // Global Chart Styling
+    Chart.defaults.font.family = "'Sofia Sans', sans-serif";
+    Chart.defaults.font.size = 14;
+    Chart.defaults.plugins.legend.labels.color = "#333";
+    Chart.defaults.plugins.legend.position = "bottom";
+    Chart.defaults.plugins.tooltip.backgroundColor = "#000000ff";
+    Chart.defaults.plugins.tooltip.titleColor = "#fff";
+    Chart.defaults.plugins.tooltip.bodyColor = "#fff";
+
     function initCharts() {
       const ctxStatus = $('#chartStatus').getContext('2d');
       const ctxLinha = $('#chartLinha').getContext('2d');
       const ctxEnt = $('#chartEntregador').getContext('2d');
 
+      // Pie Chart - Status
       chartStatus = new Chart(ctxStatus, {
         type: 'pie',
         data: {
           labels: [],
           datasets: [{
-            data: []
+            data: [],
+            backgroundColor: ['#979797ff', '#c9b611ff', '#16c940ff', '#d11a1a'],
+            borderColor: '#fff',
+            borderWidth: 2
           }]
         },
         options: {
-          responsive: true
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          }
         }
       });
+
+      // Line Chart - Concluídas ao longo do tempo
       chartLinha = new Chart(ctxLinha, {
         type: 'line',
         data: {
           labels: [],
           datasets: [{
             label: 'Concluídas',
-            data: []
+            data: [],
+            borderColor: '#d4edda ',
+            backgroundColor: 'rgba(26,122,26,0.2)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#1a7a1a'
           }]
         },
         options: {
           responsive: true,
           scales: {
+            x: {
+              ticks: {
+                color: '#333'
+              }
+            },
             y: {
+              ticks: {
+                color: '#333'
+              },
               beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
             }
           }
         }
       });
+
+      // Bar Chart - Entregas por Entregador
       chartEntregador = new Chart(ctxEnt, {
         type: 'bar',
         data: {
           labels: [],
           datasets: [{
             label: 'Entregas',
-            data: []
+            data: [],
+            backgroundColor: '#00aaff',
+            borderRadius: 8,
+            barThickness: 30
           }]
         },
         options: {
           responsive: true,
           scales: {
+            x: {
+              ticks: {
+                color: '#333'
+              }
+            },
             y: {
+              ticks: {
+                color: '#333'
+              },
               beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
             }
           }
         }
@@ -239,6 +258,7 @@ require_once '../backend/conexao.php';
     }
 
     function applyToCharts(data) {
+      // Status Pie
       chartStatus.data.labels = ['Agendada', 'Em andamento', 'Concluído', 'Cancelada'];
       chartStatus.data.datasets[0].data = [
         data.status_counts.Agendada || 0,
@@ -248,10 +268,12 @@ require_once '../backend/conexao.php';
       ];
       chartStatus.update();
 
+      // Concluídas Line
       chartLinha.data.labels = data.concluidas_por_dia.labels;
       chartLinha.data.datasets[0].data = data.concluidas_por_dia.values;
       chartLinha.update();
 
+      // Entregador Bar
       const nomes = Object.keys(data.por_entregador || {});
       chartEntregador.data.labels = nomes;
       chartEntregador.data.datasets[0].data = nomes.map(n => data.por_entregador[n]);
@@ -262,33 +284,103 @@ require_once '../backend/conexao.php';
       $('#kpiAtrasoMedio').textContent = (data.kpis.media_atraso_dias || 0).toFixed(2);
       $('#kpiCancelamentos').textContent = data.kpis.cancelamentos || 0;
       $('#kpiPercAtrasadas').textContent = ((data.kpis.perc_atrasadas || 0) * 100).toFixed(1) + '%';
-
-      // Popular select entregadores
-      const sel = $('#entregadorFilter');
-      if (sel.options.length <= 1) {
-        nomes.forEach(n => {
-          const opt = document.createElement('option');
-          opt.value = n;
-          opt.textContent = n;
-          sel.appendChild(opt);
-        });
-      }
     }
 
     async function fetchData() {
-      const res = await fetch('dashboard_data.php', {
-        cache: 'no-store'
-      });
-      const data = await res.json();
-      applyToCharts(data);
+      try {
+        const res = await fetch('dashboard_data.php', {
+          cache: 'no-store'
+        });
+        const data = await res.json();
+        applyToCharts(data);
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+      }
     }
-
-
-
-    setInterval(fetchData, 60000);
 
     initCharts();
     fetchData();
+    setInterval(fetchData, 60000);
+    // Pie Chart - Status
+    chartStatus = new Chart(ctxStatus, {
+      type: 'pie',
+      data: {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: ['#f0c419', '#00aaff', '#1a7a1a', '#d11a1a'],
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const sum = context.chart._metasets[context.datasetIndex].total;
+                const perc = ((value / sum) * 100).toFixed(1);
+                return `${label}: ${value} (${perc}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Bar Chart - Entregas por Entregador
+    chartEntregador = new Chart(ctxEnt, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Entregas',
+          data: [],
+          backgroundColor: '#00aaff',
+          borderRadius: 8,
+          barThickness: 30
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: {
+              color: '#333'
+            }
+          },
+          y: {
+            ticks: {
+              color: '#333'
+            },
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const value = context.parsed.y || 0;
+                return `Entregas: ${value}`;
+              }
+            }
+          }
+        }
+      }
+    });
   </script>
 </body>
 

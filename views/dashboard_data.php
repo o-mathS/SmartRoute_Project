@@ -1,68 +1,77 @@
 <?php
 require_once '../backend/conexao.php';
-header('Content-Type: application/json; charset=utf-8');
-error_reporting(0);
-// ---- STATUS COUNTS (pizza)
-$sqlStatus = "SELECT estado, COUNT(*) qt FROM entregas GROUP BY estado";
-$resStatus = $conn->query($sqlStatus);
-$status_counts = ['Agendada'=>0,'Em andamento'=>0,'Concluído'=>0,'Cancelada'=>0];
-while ($r = $resStatus->fetch_assoc()) {
-    $status_counts[$r['estado']] = (int)$r['qt'];
+
+// Inicializa arrays de resposta
+$response = [
+    'status_counts' => [],
+    'concluidas_por_dia' => ['labels' => [], 'values' => []],
+    'por_entregador' => [],
+    'kpis' => []
+];
+
+// 1️⃣ Contagem por status
+$result = $conn->query("
+    SELECT estado, COUNT(*) as total
+    FROM entregas
+    GROUP BY estado
+");
+while ($row = $result->fetch_assoc()) {
+    $response['status_counts'][$row['estado']] = intval($row['total']);
 }
 
-// ---- Concluídas por dia (linha)
-$sqlLinha = "SELECT DATE(data_conclusao) dia, COUNT(*) qt 
-             FROM entregas 
-             WHERE estado='Concluído' AND data_conclusao IS NOT NULL
-             GROUP BY DATE(data_conclusao) ORDER BY dia ASC";
-$resLinha = $conn->query($sqlLinha);
-$concluidas_labels = $concluidas_values = [];
-while ($r = $resLinha->fetch_assoc()) {
-    $concluidas_labels[] = $r['dia'];
-    $concluidas_values[] = (int)$r['qt'];
+// 2️⃣ Concluídas por dia (últimos 30 dias)
+$result = $conn->query("
+    SELECT DATE(data_entrega) as dia, COUNT(*) as total
+    FROM entregas
+    WHERE estado = 'Concluído'
+    AND data_entrega >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    GROUP BY DATE(data_entrega)
+    ORDER BY DATE(data_entrega)
+");
+while ($row = $result->fetch_assoc()) {
+    $response['concluidas_por_dia']['labels'][] = $row['dia'];
+    $response['concluidas_por_dia']['values'][] = intval($row['total']);
 }
 
-// ---- Por entregador (barras)
-$sqlEnt = "SELECT COALESCE(e.nome,'Indefinido') entregador, COUNT(*) qt
-           FROM entregas t
-           LEFT JOIN entregadores e ON t.entregador_id = e.id
-           GROUP BY e.nome ORDER BY qt DESC";
-$resEnt = $conn->query($sqlEnt);
-$por_entregador = [];
-while ($r = $resEnt->fetch_assoc()) {
-    $por_entregador[$r['entregador']] = (int)$r['qt'];
+// 3️⃣ Entregas por entregador (somente com entregador_id)
+$result = $conn->query("
+    SELECT e.nome as entregador, COUNT(en.id) as total
+    FROM entregadores e
+    LEFT JOIN entregas en ON en.entregador_id = e.id
+    GROUP BY e.id
+    ORDER BY e.nome
+");
+while ($row = $result->fetch_assoc()) {
+    $response['por_entregador'][$row['entregador']] = intval($row['total']);
 }
 
-// ---- KPIs
-$sqlHoje = "SELECT COUNT(*) qt FROM entregas WHERE estado='Concluído' AND DATE(data_conclusao)=CURDATE()";
-$kpi_concluidas_hoje = (int)$conn->query($sqlHoje)->fetch_assoc()['qt'];
+// 4️⃣ KPIs
+// Entregas concluídas hoje
+$response['kpis']['concluidas_hoje'] = intval($conn->query("
+    SELECT COUNT(*) FROM entregas
+    WHERE estado='Concluído' AND DATE(data_entrega)=CURDATE()
+")->fetch_row()[0]);
 
-$sqlCanc = "SELECT COUNT(*) qt FROM entregas WHERE estado='Cancelada'";
-$kpi_cancelamentos = (int)$conn->query($sqlCanc)->fetch_assoc()['qt'];
+// Média de atraso (em dias)
+$media_atraso = $conn->query("
+    SELECT AVG(DATEDIFF(NOW(), data_entrega)) 
+    FROM entregas
+    WHERE estado='Concluído' AND data_entrega < NOW()
+")->fetch_row()[0];
+$response['kpis']['media_atraso_dias'] = floatval($media_atraso);
 
-$sqlAtraso = "SELECT AVG(GREATEST(DATEDIFF(data_conclusao, data_entrega),0)) media FROM entregas WHERE estado='Concluído'";
-$media_atraso = (float)($conn->query($sqlAtraso)->fetch_assoc()['media'] ?? 0);
+// Cancelamentos
+$response['kpis']['cancelamentos'] = intval($conn->query("
+    SELECT COUNT(*) FROM entregas WHERE estado='Cancelada'
+")->fetch_row()[0]);
 
-$sqlTotConc = "SELECT COUNT(*) qt FROM entregas WHERE estado='Concluído' AND data_entrega IS NOT NULL";
-$totConc = (int)$conn->query($sqlTotConc)->fetch_assoc()['qt'];
+// % entregas atrasadas
+$total = intval($conn->query("SELECT COUNT(*) FROM entregas WHERE estado='Concluído'")->fetch_row()[0]);
+$atrasadas = intval($conn->query("
+    SELECT COUNT(*) FROM entregas WHERE estado='Concluído' AND data_entrega < NOW()
+")->fetch_row()[0]);
+$response['kpis']['perc_atrasadas'] = $total > 0 ? ($atrasadas/$total) : 0;
 
-$sqlAtr = "SELECT COUNT(*) qt FROM entregas WHERE estado='Concluído' AND data_entrega IS NOT NULL AND data_conclusao > data_entrega";
-$totAtr = (int)$conn->query($sqlAtr)->fetch_assoc()['qt'];
-
-$perc_atrasadas = $totConc > 0 ? ($totAtr/$totConc) : 0.0;
-
-// ---- resposta final
-echo json_encode([
-    'status_counts' => $status_counts,
-    'concluidas_por_dia' => [
-        'labels' => $concluidas_labels,
-        'values' => $concluidas_values
-    ],
-    'por_entregador' => $por_entregador,
-    'kpis' => [
-        'concluidas_hoje' => $kpi_concluidas_hoje,
-        'media_atraso_dias' => $media_atraso,
-        'cancelamentos' => $kpi_cancelamentos,
-        'perc_atrasadas' => $perc_atrasadas
-    ]
-], JSON_UNESCAPED_UNICODE);
+// Retorna JSON
+header('Content-Type: application/json');
+echo json_encode($response);
