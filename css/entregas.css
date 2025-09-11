@@ -126,6 +126,7 @@ body {
 .card {
   background: #eaeaea;
   border: 1px solid #ccc;
+  border-left: #a3a3a3 solid 6px;
   border-radius: 8px;
   min-height: 120px;
   padding: 18px 14px;
@@ -137,7 +138,7 @@ body {
 /* Cards concluídos */
 .card-concluida {
   background: #d4edda !important;
-  border-left: 5px solid #28a745 !important;
+  border-left: 6px solid #28a745 !important;
 }
 
 /* Ações dos cards */
