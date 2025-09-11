@@ -65,7 +65,8 @@ $stmt->bind_param("s", $status);
 $stmt->execute();
 $result = $stmt->get_result();
 
-function entregadorDisponivel($conn, $entregador_id, $data) {
+function entregadorDisponivel($conn, $entregador_id, $data)
+{
   $stmt = $conn->prepare("
     SELECT COUNT(*) as total 
     FROM entregas 
@@ -218,24 +219,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entregador_id'])) {
   <!-- Modal Nova Entrega -->
   <div id="formularioModal" style="display:none;position:fixed;top:20%;left:35%;background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);width:30%;min-width:300px;">
     <h3>Nova Entrega</h3>
-    <form method="post" style="width: 80%;" action="entregas.php">
-      <p>Preencha os dados da entrega:</p>
-      <input type="text" name="nome" required placeholder="Nome" style="margin:5px;width:100%;" title="Digite o nome do destinatário"><br>
-      <input type="text" name="endereco" required placeholder="Endereço" style="margin:5px;width:100%;" title="Digite o endereço completo"><br>
-      <input type="text" name="lat" required placeholder="Latitude" style="margin:5px;width:100%;" title="Digite a latitude do local de entrega"><br>
-      <input type="text" name="lng" required placeholder="Longitude" style="margin:5px;width:100%;" title="Digite a longitude do local de entrega"><br>
+    <form method="post" style="width: 100%;" action="entregas.php">
+      <input type="text" name="nome" required placeholder="Nome" style="margin:5px 0;width:90%;border-radius:5px; padding:6px">
+      <input type="text" name="endereco" required placeholder="Endereço" style="margin:5px 0;width:90%;border-radius:5px; padding:6px">
+      <input type="text" name="lat" required placeholder="Latitude" style="margin:5px 0;width:90%;border-radius:5px; padding:6px">
+      <input type="text" name="lng" required placeholder="Longitude" style="margin:5px 0;width:90%;border-radius:5px; padding:6px">
+
+      <p>Entregador:</p>
+      <select name="entregador_id" required style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
+        <option value="">Selecione...</option>
+        <?php
+        $res = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
+        while ($e = $res->fetch_assoc()) {
+          echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nome']) . "</option>";
+        }
+        ?>
+      </select>
+
+
       <input type="hidden" id="dataEntrega" name="data_entrega">
       <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
       <p id="dataSelecionada" style="font-weight:bold; color:#1a7a1a;"></p>
+
       <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
       <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
-      <?php if (!empty($erro)) echo "<div style='color:red;'>$erro</div>"; ?>
-      <?php if ($sucesso) echo "<div style='color:green;'>Entrega salva com sucesso!</div>"; ?>
+
+      <?php if (!empty($erro)) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
+      <?php if ($sucesso) echo "<div style='color:green;margin-top:5px;'>Entrega salva com sucesso!</div>"; ?>
     </form>
   </div>
 
   <script>
-    let calendar; // global pra não recriar várias vezes
+    let calendar;
 
     function abrirFormulario() {
       let modal = document.getElementById('formularioModal');
@@ -250,9 +265,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entregador_id'])) {
           dateClick: function(info) {
             document.getElementById('dataEntrega').value = info.dateStr;
             document.getElementById('dataSelecionada').textContent = "Entrega marcada para: " + info.dateStr;
+            atualizarEntregadores(info.dateStr);
           }
         });
         calendar.render();
+      }
+    }
+
+    // Atualiza select de entregadores disponíveis
+    async function atualizarEntregadores(data) {
+      const sel = document.getElementById('entregador_id');
+      sel.innerHTML = '<option value="">Carregando...</option>';
+
+      try {
+        const res = await fetch(`../backend/entregadores_disponiveis.php?data=${data}`, {
+          cache: 'no-store'
+        });
+        const entregadores = await res.json();
+
+        sel.innerHTML = '<option value="">Selecione um entregador</option>';
+        entregadores.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id;
+          opt.textContent = e.nome;
+          sel.appendChild(opt);
+        });
+      } catch (err) {
+        sel.innerHTML = '<option value="">Erro ao carregar</option>';
+        console.error(err);
       }
     }
 
