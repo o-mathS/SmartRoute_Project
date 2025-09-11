@@ -126,8 +126,10 @@ require_once '../backend/conexao.php';
       <span>📦 Fretes Abertos:</span>
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
       <span>✅ Concluídos:</span>
+<<<<<<< HEAD
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b>
-
+      <span>❌ Cancelados:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
     </div>
     <nav class="left-mini-menu">
       <ul class="mini-menu-list">
