@@ -118,9 +118,7 @@ require_once '../backend/conexao.php';
     <div class="field"><label>Fim</label><input type="date" id="endDate"></div>
     <div class="field"><label>Entregador</label>
       <select id="entregadorFilter"><option value="">Todos</option></select>
-=======
-=======
->>>>>>> Stashed changes
+
   <div class="top-bar"></div>
   <div class="side-bar">
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
@@ -129,10 +127,7 @@ require_once '../backend/conexao.php';
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
       <span>✅ Concluídos:</span>
       <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b>
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
     </div>
     <nav class="left-mini-menu">
       <ul class="mini-menu-list">
