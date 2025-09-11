@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
     $erro = 'Preencha todos os campos e selecione uma data!';
   } else {
     $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega) VALUES (?, ?, ?, ?, "Agendada", ?)');
-    $stmt->bind_param('sssss', $nome, $endereco, $lat, $lng, $dataEntrega);
+    $stmt->bind_param('sssss', $nome, $endereco, $lat, $lng, $_POST['data_entrega']);
     if ($stmt->execute()) {
       $sucesso = true;
       header("Location: entregas.php");
@@ -107,6 +107,7 @@ $result = $stmt->get_result();
     </div>
     <nav class="left-mini-menu">
       <ul class="mini-menu-list">
+        <li><a href="entregas.php" class="mini-menu-item active"><span class="mini-menu-icon">📦</span>Entregas</a></li>
         <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
       </ul>
     </nav>
