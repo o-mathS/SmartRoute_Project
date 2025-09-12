@@ -1,5 +1,13 @@
 <?php
 require_once '../backend/conexao.php';
+session_start();
+// checa se está logado
+if (!isset($_SESSION['usuario_id'])) {
+  header("Location: index.php");
+  exit;
+}
+
+$usuarioRole = $_SESSION['usuario_role'] ?? 'user'; // pega do login
 
 $conn->query("
     UPDATE entregas 
@@ -11,50 +19,69 @@ $conn->query("
 $erro = '';
 $sucesso = false;
 
+// --- Registrar novo entregador (apenas admin) ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['novo_entregador']) && $usuarioRole === 'admin') {
+  $nome = trim($_POST['nome_entregador']);
+  $email = trim($_POST['email_entregador']);
+  $telefone = trim($_POST['telefone_entregador']);
+
+  if ($nome) {
+    $stmt = $conn->prepare("INSERT INTO entregadores (nome, email, telefone) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $nome, $email, $telefone);
+    if (!$stmt->execute()) {
+      $erro = "Erro ao salvar entregador: " . $conn->error;
+    }
+    $stmt->close();
+    header("Location: entregas.php");
+    exit;
+  }
+}
+
+
 // Inserção nova entrega
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng']) && !isset($_POST['concluir_id']) && !isset($_POST['cancelar_id'])) {
-    $nome = trim($_POST['nome']);
-    $endereco = trim($_POST['endereco']);
-    $lat = trim($_POST['lat']);
-    $lng = trim($_POST['lng']);
-    $dataEntrega = trim($_POST['data_entrega']);
-    $entregador_id = isset($_POST['entregador_id']) ? intval($_POST['entregador_id']) : null;
+  $nome = trim($_POST['nome']);
+  $endereco = trim($_POST['endereco']);
+  $lat = trim($_POST['lat']);
+  $lng = trim($_POST['lng']);
+  $dataEntrega = trim($_POST['data_entrega']);
+  $entregador_id = isset($_POST['entregador_id']) ? intval($_POST['entregador_id']) : null;
 
-    if (!$nome || !$endereco || !$lat || !$lng || !$dataEntrega || !$entregador_id) {
-        $erro = 'Preencha todos os campos e selecione um entregador!';
+  if (!$nome || !$endereco || !$lat || !$lng || !$dataEntrega || !$entregador_id) {
+    $erro = 'Preencha todos os campos e selecione um entregador!';
+  } else {
+    $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega, entregador_id) VALUES (?, ?, ?, ?, "Agendada", ?, ?)');
+    $stmt->bind_param('sssssi', $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id);
+    if ($stmt->execute()) {
+      $sucesso = true;
+      header("Location: entregas.php");
+      exit;
     } else {
-        $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega, entregador_id) VALUES (?, ?, ?, ?, "Agendada", ?, ?)');
-        $stmt->bind_param('sssssi', $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id);
-        if ($stmt->execute()) {
-            $sucesso = true;
-            header("Location: entregas.php");
-            exit;
-        } else {
-            $erro = 'Erro ao salvar entrega: ' . $conn->error;
-        }
+      $erro = 'Erro ao salvar entrega: ' . $conn->error;
     }
+  }
 }
 
 // Concluir entrega
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['concluir_id'])) {
-    $idConcluir = intval($_POST['concluir_id']);
-    $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_entrega=NOW() WHERE id=?");
-    $stmt->bind_param("i", $idConcluir);
-    $stmt->execute();
-    $stmt->close();
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+  $idConcluir = intval($_POST['concluir_id']);
+  $stmt = $conn->prepare("UPDATE entregas SET estado='Concluído', data_entrega=NOW() WHERE id=?");
+  $stmt->bind_param("i", $idConcluir);
+  $stmt->execute();
+  $stmt->close();
+  header("Location: " . $_SERVER['PHP_SELF']);
+  exit;
 }
 
 // Cancelar entrega
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_id'])) {
-    $idCancelar = intval($_POST['cancelar_id']);
-    $stmt = $conn->prepare("UPDATE entregas SET estado='Cancelada' WHERE id=?");
-    $stmt->bind_param("i", $idCancelar);
-    $stmt->execute();
-    $stmt->close();
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+  $idCancelar = intval($_POST['cancelar_id']);
+  $stmt = $conn->prepare("UPDATE entregas SET estado='Cancelada' WHERE id=?");
+  $stmt->bind_param("i", $idCancelar);
+  $stmt->execute();
+  $stmt->close();
+  header("Location: " . $_SERVER['PHP_SELF']);
+  exit;
 }
 
 // Status selecionado
@@ -67,49 +94,27 @@ $result = $stmt->get_result();
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-<meta charset="UTF-8" />
-<title>SmartRoute - Entregas</title>
-<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../css/entregas.css" />
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
-<style>
-    /* Modal responsivo */
-    #formularioModal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        width: 90%;
-        max-width: 400px;
-        max-height: 80vh;
-        overflow-y: auto;
-        z-index: 9999;
-    }
-    /* Status cards */
-    .card-cancelada { background-color: #ffe6e6; border-left: 6px solid #cc0000; opacity: 0.95; }
-    .card-cancelada h3, .card-cancelada p { color: #a10000; }
-    .card-andamento { background-color: #fffde6; border-left: 6px solid #ccbe00; opacity: 0.95; }
-    .card-andamento h3, .card-andamento p { color: #a19100; }
-</style>
+  <meta charset="UTF-8" />
+  <title>SmartRoute - Entregas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/entregas.css" />
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 </head>
+
 <body>
-<div class="top-bar"></div>
-<div class="side-bar">
+  <div class="top-bar"></div>
+  <div class="side-bar">
     <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
     <div class="monitoramento">
-        <span>📦 Fretes Abertos:</span>
-        <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
-        <span>✅ Concluídos:</span>
-        <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b><br>
-        <span>❌ Cancelados:</span>
-        <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
+      <span>📦 Fretes Abertos:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
+      <span>✅ Concluídos:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Concluído'")->fetch_assoc()['total'] ?></b><br>
+      <span>❌ Cancelados:</span>
+      <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
     </div>
     <nav class="left-mini-menu">
       <ul class="mini-menu-list">
@@ -117,14 +122,19 @@ $result = $stmt->get_result();
         <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
       </ul>
     </nav>
-</div>
+  </div>
 
-<form method="post" action="logout.php" style=" margin-top: 20px;">
-  <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
-</form>
+  <form method="post" action="logout.php" style=" margin-top: 20px;">
+    <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
+  </form>
 
-<div class="main-content">
+  <div class="main-content">
     <button class="add-btn" onclick="abrirFormulario()">+</button>
+    <?php if ($usuarioRole === 'admin'): ?>
+      <button class="add-btn" onclick="abrirModalEntregador()" style="background: #1a7a1a;">+ Entregador</button>
+    <?php endif; ?>
+
+
     <h2>Gerenciamento de Entregas</h2>
     <p>Adicione, visualize e gerencie suas entregas.</p>
 
@@ -173,66 +183,67 @@ $result = $stmt->get_result();
         <p>Nenhuma entrega <?= strtolower($status) ?>.</p>
       <?php endif; ?>
     </div>
-</div>
+  </div>
 
-<!-- Modal Nova Entrega -->
-<div id="formularioModal">
+  <!-- Modal Nova Entrega -->
+  <div id="formularioModal">
     <h3>Nova Entrega</h3>
     <form method="post" action="entregas.php">
-        <input type="text" name="nome" required placeholder="Nome" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        <input type="text" name="endereco" required placeholder="Endereço" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        <input type="text" name="lat" required placeholder="Latitude" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        <input type="text" name="lng" required placeholder="Longitude" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
+      <input type="text" name="nome" required placeholder="Nome" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
+      <input type="text" name="endereco" required placeholder="Endereço" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
+      <input type="text" name="lat" required placeholder="Latitude" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
+      <input type="text" name="lng" required placeholder="Longitude" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
 
-        <p>Entregador:</p>
-        <select id="entregador_id" name="entregador_id" required style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
-            <option value="">Selecione...</option>
-            <?php
-            $res = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
-            while ($e = $res->fetch_assoc()) {
-                echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nome']) . "</option>";
-            }
-            ?>
-        </select>
+      <p>Entregador:</p>
+      <select id="entregador_id" name="entregador_id" required style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
+        <option value="">Selecione...</option>
+        <?php
+        $res = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
+        while ($e = $res->fetch_assoc()) {
+          echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nome']) . "</option>";
+        }
+        ?>
+      </select>
 
-        <input type="hidden" id="dataEntrega" name="data_entrega">
-        <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
-        <p id="dataSelecionada" style="font-weight:bold;color:#1a7a1a;"></p>
+      <input type="hidden" id="dataEntrega" name="data_entrega">
+      <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
+      <p id="dataSelecionada" style="font-weight:bold;color:#1a7a1a;"></p>
 
-        <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
-        <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
+      <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
+      <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
 
-        <?php if (!empty($erro)) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
-        <?php if ($sucesso) echo "<div style='color:green;margin-top:5px;'>Entrega salva com sucesso!</div>"; ?>
+      <?php if (!empty($erro)) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
+      <?php if ($sucesso) echo "<div style='color:green;margin-top:5px;'>Entrega salva com sucesso!</div>"; ?>
     </form>
-</div>
+  </div>
 
-<script>
-let calendar;
+  <script>
+    let calendar;
 
-function abrirFormulario() {
-    let modal = document.getElementById('formularioModal');
-    modal.style.display = 'block';
+    function abrirFormulario() {
+      let modal = document.getElementById('formularioModal');
+      modal.style.display = 'block';
 
-    if (!calendar) {
+      if (!calendar) {
         let calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'pt-br',
-            selectable: true,
-            dateClick: function(info) {
-                document.getElementById('dataEntrega').value = info.dateStr;
-                document.getElementById('dataSelecionada').textContent = "Entrega marcada para: " + info.dateStr;
-            }
+          initialView: 'dayGridMonth',
+          locale: 'pt-br',
+          selectable: true,
+          dateClick: function(info) {
+            document.getElementById('dataEntrega').value = info.dateStr;
+            document.getElementById('dataSelecionada').textContent = "Entrega marcada para: " + info.dateStr;
+          }
         });
         calendar.render();
+      }
     }
-}
 
-function abrirRota(entrega) {
-    const url = `rotas.html?lat=${encodeURIComponent(entrega.lat)}&lng=${encodeURIComponent(entrega.lng)}&endereco=${encodeURIComponent(entrega.endereco)}`;
-    window.location.href = url;
-}
-</script>
+    function abrirRota(entrega) {
+      const url = `rotas.html?lat=${encodeURIComponent(entrega.lat)}&lng=${encodeURIComponent(entrega.lng)}&endereco=${encodeURIComponent(entrega.endereco)}`;
+      window.location.href = url;
+    }
+  </script>
 </body>
+
 </html>

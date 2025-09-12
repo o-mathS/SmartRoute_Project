@@ -138,3 +138,14 @@ button:hover {
     display: none;
   }
 }
+.login-error {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.register-link a {
+  color: #8caa26;
+  text-decoration: underline;
+  font-weight: bold;
+}

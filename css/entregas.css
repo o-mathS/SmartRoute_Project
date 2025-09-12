@@ -190,22 +190,57 @@ body {
   }
 }
 
- .tabs {
-      display: flex;
-      margin: 20px 0;
-    }
+.tabs {
+  display: flex;
+  margin: 20px 0;
+}
 
-    .tabs a {
-      padding: 12px 20px;
-      text-decoration: none;
-      transition: .3s;
-      color: #fff;
-      background: #3f0d71;
-      margin: 0 5px;
-      border-radius: 5px;
-    }
+.tabs a {
+  padding: 12px 20px;
+  text-decoration: none;
+  transition: 0.3s;
+  color: #fff;
+  background: #3f0d71;
+  margin: 0 5px;
+  border-radius: 5px;
+}
 
-    .tabs a.active,
-    .tabs a:hover {
-      background: #00b427;
-    }
+.tabs a.active,
+.tabs a:hover {
+  background: #00b427;
+}
+#formularioModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 9999;
+}
+/* Status cards */
+.card-cancelada {
+  background-color: #ffe6e6;
+  border-left: 6px solid #cc0000;
+  opacity: 0.95;
+}
+.card-cancelada h3,
+.card-cancelada p {
+  color: #a10000;
+}
+.card-andamento {
+  background-color: #fffde6;
+  border-left: 6px solid #ccbe00;
+  opacity: 0.95;
+}
+.card-andamento h3,
+.card-andamento p {
+  color: #a19100;
+}
