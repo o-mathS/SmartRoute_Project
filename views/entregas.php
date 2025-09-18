@@ -133,7 +133,7 @@ $result = $stmt->get_result();
     <button class="add-btn" onclick="abrirFormulario()">+</button>
 
     <?php if ($usuarioRole === 'admin'): ?>
-        <button class="add-btn" onclick="abrirModalEntregador()" style="background: #1a7a1a;">+ Entregador</button>
+    <button class="add-btn" style="background-color: #007bff; font-size: 20px;" onclick="abrirModalEntregador()">👤</button>
     <?php endif; ?>
 
     <h2>Gerenciamento de Entregas</h2>
