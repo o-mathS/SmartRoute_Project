@@ -226,12 +226,29 @@ $result = $stmt->get_result();
         <input type="hidden" name="novo_entregador" value="1">
         <input type="text" name="nome_entregador" placeholder="Nome" required style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
         <input type="email" name="email_entregador" placeholder="Email" style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-        <input type="text" name="telefone_entregador" placeholder="Telefone" style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
+        <input type="text" name="telefone_entregador" id="telefone_entregador" placeholder="Telefone celular" required
+               style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
         <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
         <button type="button" onclick="document.getElementById('modalEntregador').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
     </form>
 </div>
+
+<script>
+const telefoneInput = document.getElementById('telefone_entregador');
+
+telefoneInput.addEventListener('input', function (e) {
+    let x = e.target.value.replace(/\D/g, '').slice(0, 11); // só números, máximo 11 dígitos
+    let formatted = '';
+
+    if (x.length > 0) formatted += '(' + x.slice(0, 2) + ')';
+    if (x.length >= 7) formatted += ' ' + x.slice(2, 7) + '-' + x.slice(7);
+    else if (x.length > 2) formatted += ' ' + x.slice(2);
+
+    e.target.value = formatted;
+});
+</script>
 <?php endif; ?>
+
 
 <script>
 let calendar;
