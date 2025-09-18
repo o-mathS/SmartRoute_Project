@@ -1,0 +1,32 @@
+[
+    {
+        "id": 101,
+        "title": "Acidente na Av. dos Bandeirantes",
+        "description": "Carro capotou na pista marginal, tráfego lento no sentido centro.",
+        "time": "2025-08-22 09:33",
+        "location": "Av. dos Bandeirantes",
+        "lat": -23.62,
+        "lng": -46.7,
+        "severity": "high"
+    },
+    {
+        "id": 102,
+        "title": "Tráfego intenso na Marginal Pinheiros",
+        "description": "Fluxo acima do normal devido a volume de veículos.",
+        "time": "2025-08-22 09:23",
+        "location": "Marginal Pinheiros",
+        "lat": -23.589,
+        "lng": -46.685,
+        "severity": "medium"
+    },
+    {
+        "id": 103,
+        "title": "Sem incidentes na região central",
+        "description": "Trânsito fluido.",
+        "time": "2025-08-22 09:03",
+        "location": "Centro",
+        "lat": -23.55,
+        "lng": -46.633,
+        "severity": "low"
+    }
+]
