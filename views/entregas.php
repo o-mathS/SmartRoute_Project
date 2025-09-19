@@ -8,10 +8,10 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// --- Pega a role do usuário ---
+// --- Role do usuário ---
 $usuarioRole = $_SESSION['usuario_role'] ?? 'user';
 
-// --- Atualiza status de entregas automaticamente ---
+// --- Atualiza status automaticamente ---
 $conn->query("
     UPDATE entregas 
     SET estado = 'Em andamento' 
@@ -19,11 +19,27 @@ $conn->query("
     AND DATE(data_entrega) <= CURDATE()
 ");
 
+// --- Endpoint interno para geocodificação (OpenStreetMap) ---
+if (isset($_GET['geocode_endereco'])) {
+    $endereco = urlencode($_GET['geocode_endereco']);
+    $url = "https://nominatim.openstreetmap.org/search?format=json&q=$endereco";
+    $opts = [
+        "http" => [
+            "header" => "User-Agent: smartroute/1.0\r\n"
+        ]
+    ];
+    $context = stream_context_create($opts);
+    $response = file_get_contents($url, false, $context);
+    header("Content-Type: application/json");
+    echo $response;
+    exit;
+}
+
 // --- Variáveis de controle ---
 $erro = '';
 $sucesso = false;
 
-// --- Registrar novo entregador (apenas admin) ---
+// --- Registrar novo entregador (admin) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['novo_entregador']) && $usuarioRole === 'admin') {
     $nome = trim($_POST['nome_entregador']);
     $email = trim($_POST['email_entregador']);
@@ -42,7 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['novo_entregador']) &&
 }
 
 // --- Inserção nova entrega ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng']) && !isset($_POST['concluir_id']) && !isset($_POST['cancelar_id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['endereco'], $_POST['lat'], $_POST['lng'], $_POST['data_entrega']) 
+    && !isset($_POST['concluir_id']) && !isset($_POST['cancelar_id'])) {
+
     $nome = trim($_POST['nome']);
     $endereco = trim($_POST['endereco']);
     $lat = trim($_POST['lat']);
@@ -98,18 +116,18 @@ $result = $stmt->get_result();
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>SmartRoute - Entregas</title>
-<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../css/entregas.css" />
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/entregas.css">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 </head>
 <body>
 
 <div class="top-bar"></div>
 <div class="side-bar">
-    <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route" />
+    <img src="../assets/img/logo.png" class="logo" alt="Logo Smart Route">
     <div class="monitoramento">
         <span>📦 Fretes Abertos:</span>
         <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado IN ('Agendada','Em andamento')")->fetch_assoc()['total'] ?></b><br>
@@ -118,23 +136,13 @@ $result = $stmt->get_result();
         <span>❌ Cancelados:</span>
         <b><?= $conn->query("SELECT COUNT(*) AS total FROM entregas WHERE estado = 'Cancelada'")->fetch_assoc()['total'] ?></b>
     </div>
-    <nav class="left-mini-menu">
-        <ul class="mini-menu-list">
-            <li><a href="entregas.php" class="mini-menu-item active"><span class="mini-menu-icon">📦</span>Entregas</a></li>
-            <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
-        </ul>
-    </nav>
 </div>
-
-<form method="post" action="logout.php" style="margin-top: 20px;">
-    <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
-</form>
 
 <div class="main-content">
     <button class="add-btn" onclick="abrirFormulario()">+</button>
 
     <?php if ($usuarioRole === 'admin'): ?>
-        <button class="add-btn" style="background-color: #007bff; font-size: 20px;" onclick="abrirModalEntregador()">👤</button>
+        <button class="add-btn" style="background-color:#007bff;font-size:20px;" onclick="abrirModalEntregador()">👤</button>
     <?php endif; ?>
 
     <h2>Gerenciamento de Entregas</h2>
@@ -151,9 +159,9 @@ $result = $stmt->get_result();
         <?php if ($result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="card
-                    <?= $row['estado'] === 'Em andamento' ? 'card-andamento' : '' ?>
-                    <?= $row['estado'] === 'Concluído' ? ' card-concluida' : '' ?>
-                    <?= $row['estado'] === 'Cancelada' ? ' card-cancelada' : '' ?>">
+                    <?= $row['estado'] === 'Em andamento' ? 'card-andamento':'' ?>
+                    <?= $row['estado'] === 'Concluído' ? 'card-concluida':'' ?>
+                    <?= $row['estado'] === 'Cancelada' ? 'card-cancelada':'' ?>">
                     <h3><?= htmlspecialchars($row['nome']) ?></h3>
                     <p><b>Endereço:</b> <?= htmlspecialchars($row['endereco']) ?></p>
                     <p><b>Status:</b> <?= htmlspecialchars($row['estado']) ?></p>
@@ -164,19 +172,6 @@ $result = $stmt->get_result();
                     <?php elseif (!empty($row['data_entrega'])): ?>
                         <p><b>Data Agendada:</b> <?= htmlspecialchars($row['data_entrega']) ?></p>
                     <?php endif; ?>
-                    <div class="card-actions">
-                        <?php if ($row['estado'] !== 'Concluído' && $row['estado'] !== 'Cancelada'): ?>
-                            <button class="rota-btn" onclick='abrirRota(<?= json_encode($row) ?>)'>Ver Rota</button>
-                            <form method="post" style="display:inline;" onsubmit="return confirm('Deseja cancelar esta entrega?')">
-                                <input type="hidden" name="cancelar_id" value="<?= $row['id'] ?>" />
-                                <button type="submit" class="remover-btn">Cancelar</button>
-                            </form>
-                            <form method="post" style="display:inline;">
-                                <input type="hidden" name="concluir_id" value="<?= $row['id'] ?>" />
-                                <button type="submit" class="concluir-btn">Concluir</button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
@@ -186,128 +181,78 @@ $result = $stmt->get_result();
 </div>
 
 <!-- Modal Nova Entrega -->
-<div id="formularioModal">
+<div id="formularioModal" style="display:none;">
     <h3>Nova Entrega</h3>
     <form method="post" action="entregas.php">
-        <input type="text" name="nome" required placeholder="Nome" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        
-        <input type="text" id="cep" name="cep" required placeholder="CEP" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-        <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px;background:#f5f5f5;">
-        <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px;background:#f5f5f5;">
+        <input type="text" name="nome" required placeholder="Nome" style="width:90%;margin:5px 0;padding:6px;border-radius:5px;">
+        <input type="text" id="cep" name="cep" required placeholder="CEP" style="width:90%;margin:5px 0;padding:6px;border-radius:5px;">
+        <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly style="width:90%;margin:5px 0;padding:6px;border-radius:5px;">
+        <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly style="width:90%;margin:5px 0;padding:6px;border-radius:5px;background:#f5f5f5;">
+        <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly style="width:90%;margin:5px 0;padding:6px;border-radius:5px;background:#f5f5f5;">
 
         <p>Entregador:</p>
-        <select id="entregador_id" name="entregador_id" required style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
+        <select id="entregador_id" name="entregador_id" required style="width:100%;padding:6px;border-radius:5px;">
             <option value="">Selecione...</option>
             <?php
-            $res = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
-            while ($e = $res->fetch_assoc()) {
+            $res = $conn->query("SELECT id,nome FROM entregadores ORDER BY nome");
+            while ($e=$res->fetch_assoc()) {
                 echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nome']) . "</option>";
             }
             ?>
         </select>
 
         <input type="hidden" id="dataEntrega" name="data_entrega">
-        <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
+        <div id="calendar" style="max-width:100%;margin:10px 0;"></div>
         <p id="dataSelecionada" style="font-weight:bold;color:#1a7a1a;"></p>
 
-        <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
-        <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
-        <?php if (!empty($erro)) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
+        <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;padding:5px 10px;border-radius:5px;">Salvar</button>
+        <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;padding:5px 10px;border-radius:5px;">Cancelar</button>
+        <?php if ($erro) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
         <?php if ($sucesso) echo "<div style='color:green;margin-top:5px;'>Operação realizada com sucesso!</div>"; ?>
     </form>
 </div>
-
-<?php if ($usuarioRole === 'admin'): ?>
-    <!-- Modal Novo Entregador -->
-    <div id="modalEntregador" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.3); z-index:999;">
-        <h3>Novo Entregador</h3>
-        <form id="formEntregador" method="post" action="entregas.php">
-            <input type="hidden" name="novo_entregador" value="1">
-            <input type="text" name="nome_entregador" placeholder="Nome" required style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-            <input type="email" name="email_entregador" placeholder="Email" style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-            <input type="text" name="telefone_entregador" id="telefone_entregador" placeholder="Telefone celular" required style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-            <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
-            <button type="button" onclick="document.getElementById('modalEntregador').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
-        </form>
-    </div>
-<?php endif; ?>
 
 <script>
 document.getElementById('cep').addEventListener('blur', async function() {
     const cep = this.value.replace(/\D/g,'');
     if (cep.length === 8) {
         try {
-            // API ViaCEP
             const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await resp.json();
             if (!data.erro) {
                 const endereco = `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`;
                 document.getElementById('endereco').value = endereco;
 
-                // Fallback OpenStreetMap
-                const geoResp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`);
+                // Geocodificação via backend
+                const geoResp = await fetch(`entregas.php?geocode_endereco=${encodeURIComponent(endereco)}`);
                 const geoData = await geoResp.json();
                 if (geoData.length > 0) {
                     document.getElementById('lat').value = geoData[0].lat;
                     document.getElementById('lng').value = geoData[0].lon;
                 }
             } else alert('CEP não encontrado!');
-        } catch (err) {
-            console.error(err);
-        }
+        } catch(err){ console.error(err); }
     }
 });
 
 let calendar;
-function abrirFormulario() {
-    let modal = document.getElementById('formularioModal');
-    modal.style.display = 'block';
-
-    if (!calendar) {
-        let calendarEl = document.getElementById('calendar');
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'pt-br',
-            selectable: true,
-            dateClick: function(info) {
-                document.getElementById('dataEntrega').value = info.dateStr;
-                document.getElementById('dataSelecionada').textContent = "Entrega marcada para: " + info.dateStr;
+function abrirFormulario(){
+    document.getElementById('formularioModal').style.display='block';
+    if(!calendar){
+        calendar=new FullCalendar.Calendar(document.getElementById('calendar'),{
+            initialView:'dayGridMonth',
+            locale:'pt-br',
+            selectable:true,
+            dateClick:function(info){
+                document.getElementById('dataEntrega').value=info.dateStr;
+                document.getElementById('dataSelecionada').textContent="Entrega marcada para: "+info.dateStr;
             }
         });
         calendar.render();
     }
 }
 
-function abrirModalEntregador() {
-    document.getElementById('modalEntregador').style.display = 'block';
-}
-
-function abrirRota(entrega) {
-    const url = `rotas.html?lat=${encodeURIComponent(entrega.lat)}&lng=${encodeURIComponent(entrega.lng)}&endereco=${encodeURIComponent(entrega.endereco)}`;
-    window.location.href = url;
-}
-
-// Máscara de telefone
-const telefoneInput = document.getElementById('telefone_entregador');
-if (telefoneInput) {
-    telefoneInput.addEventListener('input', function(e) {
-        let x = e.target.value.replace(/\D/g, '').slice(0, 11);
-        let formatted = '';
-        if (x.length > 0) formatted += '(' + x.slice(0, 2) + ')';
-        if (x.length >= 7) formatted += ' ' + x.slice(2, 7) + '-' + x.slice(7);
-        else if (x.length > 2) formatted += ' ' + x.slice(2);
-        e.target.value = formatted;
-    });
-
-    document.getElementById('formEntregador')?.addEventListener('submit', function(e) {
-        const nums = telefoneInput.value.replace(/\D/g, '');
-        if (nums.length !== 11) {
-            alert('Digite um número de celular válido com 11 dígitos.');
-            e.preventDefault();
-        }
-    });
-}
+function abrirModalEntregador(){ document.getElementById('modalEntregador').style.display='block'; }
 </script>
 </body>
 </html>
