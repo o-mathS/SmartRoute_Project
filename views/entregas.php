@@ -248,7 +248,7 @@ $result = $stmt->get_result();
                         document.getElementById('endereco').value = endereco;
 
                         // Fallback OpenStreetMap
-                        const geoResp = await fetch(`geocode_proxy.php?address=${encodeURIComponent(endereco)}`);
+                        const geoResp = await fetch(`../backend/geocode_proxy.php?address=${encodeURIComponent(endereco)}`);
                         const geoData = await geoResp.json();
                         if (geoData.length > 0) {
                             document.getElementById('lat').value = geoData[0].lat;
