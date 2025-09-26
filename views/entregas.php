@@ -111,21 +111,21 @@ $result = $stmt->get_result();
 <body>
     <!-- Popup de boas-vindas -->
     <?php if (isset($_SESSION['usuario_nome'])): ?>
-    <style>
-        #welcome-popup {
-            background: #fff;
-            padding: 7px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-            font-size: 1rem;
-            font-family: 'Sofia Sans',sans-serif;
-            min-width: 120px;
-            max-width: 200px;
-            text-align: center;
-            margin: 18px auto 8px auto;
-            display: block;
-        }
-    </style>
+        <style>
+            #welcome-popup {
+                background: #fff;
+                padding: 7px 16px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+                font-size: 1rem;
+                font-family: 'Sofia Sans', sans-serif;
+                min-width: 120px;
+                max-width: 200px;
+                text-align: center;
+                margin: 18px auto 8px auto;
+                display: block;
+            }
+        </style>
     <?php endif; ?>
 
     <div class="top-bar"></div>
@@ -135,7 +135,7 @@ $result = $stmt->get_result();
                 <span>👋 Bem-vindo, <b><?= htmlspecialchars($_SESSION['usuario_nome']) ?></b>!</span>
             </div>
             <script>
-                setTimeout(function() {
+                setTimeout(function () {
                     var popup = document.getElementById('welcome-popup');
                     if (popup) popup.style.display = 'none';
                 }, 15000);
@@ -152,21 +152,25 @@ $result = $stmt->get_result();
         </div>
         <nav class="left-mini-menu">
             <ul class="mini-menu-list">
-                <li><a href="entregas.php" class="mini-menu-item active"><span class="mini-menu-icon">📦</span>Entregas</a></li>
-                <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a></li>
+                <li><a href="entregas.php" class="mini-menu-item active"><span
+                            class="mini-menu-icon">📦</span>Entregas</a></li>
+                <li><a href="relatorios.php" class="mini-menu-item"><span class="mini-menu-icon">📊</span>Relatórios</a>
+                </li>
             </ul>
         </nav>
     </div>
 
     <form method="post" action="logout.php" style="margin-top: 20px;">
-        <button type="submit" style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
+        <button type="submit"
+            style="position: fixed; top: 860px; left: 80px; padding: 10px 20px; background-color: #d11a1a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair</button>
     </form>
 
     <div class="main-content">
         <button class="add-btn" onclick="abrirFormulario()">+</button>
 
         <?php if ($usuarioRole === 'admin'): ?>
-            <button class="add-btn" style="background-color: #007bff; font-size: 20px;" onclick="abrirModalEntregador()">👤</button>
+            <button class="add-btn" style="background-color: #007bff; font-size: 20px;"
+                onclick="abrirModalEntregador()">👤</button>
         <?php endif; ?>
 
         <h2>Gerenciamento de Entregas</h2>
@@ -199,7 +203,8 @@ $result = $stmt->get_result();
                         <div class="card-actions">
                             <?php if ($row['estado'] !== 'Concluído' && $row['estado'] !== 'Cancelada'): ?>
                                 <button class="rota-btn" onclick='abrirRota(<?= json_encode($row) ?>)'>Ver Rota</button>
-                                <form method="post" style="display:inline;" onsubmit="return confirm('Deseja cancelar esta entrega?')">
+                                <form method="post" style="display:inline;"
+                                    onsubmit="return confirm('Deseja cancelar esta entrega?')">
                                     <input type="hidden" name="cancelar_id" value="<?= $row['id'] ?>" />
                                     <button type="submit" class="remover-btn">Cancelar</button>
                                 </form>
@@ -220,16 +225,31 @@ $result = $stmt->get_result();
     <!-- Modal Nova Entrega -->
     <div id="formularioModal">
         <h3>Nova Entrega</h3>
-        <form method="post" action="entregas.php">
-            <input type="text" name="nome" required placeholder="Nome" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
+        <style>
+            input:focus,
+            select:focus,
+            button:focus {
+                outline: none;
+                box-shadow: 0 0 5px #1a7a1a55;
+            }
+        </style>
 
-            <input type="text" id="cep" name="cep" required placeholder="CEP" style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-            <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px">
-            <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px;background:#f5f5f5;">
-            <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly style="margin:5px 0;width:90%;border-radius:5px;padding:6px;background:#f5f5f5;">
+        <form method="post" action="entregas.php">
+            <input type="text" name="nome" required placeholder="Nome"
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+
+            <input type="text" id="cep" name="cep" required placeholder="CEP"
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+            <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+            <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+            <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
 
             <p>Entregador:</p>
-            <select id="entregador_id" name="entregador_id" required style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
+            <select id="entregador_id" name="entregador_id" required
+                style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
                 <option value="">Selecione...</option>
                 <?php
                 $res = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
@@ -243,30 +263,58 @@ $result = $stmt->get_result();
             <div id="calendar" style="max-width:100%; margin:10px 0;"></div>
             <p id="dataSelecionada" style="font-weight:bold;color:#1a7a1a;"></p>
 
-            <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
-            <button type="button" onclick="document.getElementById('formularioModal').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
-            <?php if (!empty($erro)) echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
-            <?php if ($sucesso) echo "<div style='color:green;margin-top:5px;'>Operação realizada com sucesso!</div>"; ?>
+            <button type="submit"
+                style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
+            <button type="button" onclick="document.getElementById('formularioModal').style.display='none'"
+                style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
+            <?php if (!empty($erro))
+                echo "<div style='color:red;margin-top:5px;'>$erro</div>"; ?>
+            <?php if ($sucesso)
+                echo "<div style='color:green;margin-top:5px;'>Operação realizada com sucesso!</div>"; ?>
         </form>
     </div>
 
     <?php if ($usuarioRole === 'admin'): ?>
         <!-- Modal Novo Entregador -->
-        <div id="modalEntregador" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.3); z-index:999;">
+        <div id="modalEntregador"
+            style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.3); z-index:999;">
             <h3>Novo Entregador</h3>
+            <style>
+                #formEntregador input:focus,
+                #formEntregador button:focus {
+                    outline: none;
+                    box-shadow: 0 0 5px #1a7a1a55;
+                }
+            </style>
+
             <form id="formEntregador" method="post" action="entregas.php">
                 <input type="hidden" name="novo_entregador" value="1">
-                <input type="text" name="nome_entregador" placeholder="Nome" required style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-                <input type="email" name="email_entregador" placeholder="Email" style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-                <input type="text" name="telefone_entregador" id="telefone_entregador" placeholder="Telefone Celular" required style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
-                <button type="submit" style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
-                <button type="button" onclick="document.getElementById('modalEntregador').style.display='none'" style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
+
+                <input type="text" name="nome_entregador" placeholder="Nome" required
+                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+
+                <input type="email" name="email_entregador" placeholder="Email"
+                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+
+                <input type="text" name="telefone_entregador" id="telefone_entregador" placeholder="Telefone Celular"
+                    required style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+
+                <button type="submit"
+                    style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">
+                    Salvar
+                </button>
+
+                <button type="button" onclick="document.getElementById('modalEntregador').style.display='none'"
+                    style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">
+                    Cancelar
+                </button>
             </form>
+
         </div>
     <?php endif; ?>
 
     <script>
-        document.getElementById('cep').addEventListener('blur', async function() {
+        document.getElementById('cep').addEventListener('blur', async function () {
             const cep = this.value.replace(/\D/g, '');
             if (cep.length === 8) {
                 try {
@@ -303,7 +351,7 @@ $result = $stmt->get_result();
                     initialView: 'dayGridMonth',
                     locale: 'pt-br',
                     selectable: true,
-                    dateClick: function(info) {
+                    dateClick: function (info) {
                         document.getElementById('dataEntrega').value = info.dateStr;
                         document.getElementById('dataSelecionada').textContent = "Entrega marcada para: " + info.dateStr;
                     }
@@ -324,7 +372,7 @@ $result = $stmt->get_result();
         // Máscara de telefone
         const telefoneInput = document.getElementById('telefone_entregador');
         if (telefoneInput) {
-            telefoneInput.addEventListener('input', function(e) {
+            telefoneInput.addEventListener('input', function (e) {
                 let x = e.target.value.replace(/\D/g, '').slice(0, 11);
                 let formatted = '';
                 if (x.length > 0) formatted += '(' + x.slice(0, 2) + ')';
@@ -333,7 +381,7 @@ $result = $stmt->get_result();
                 e.target.value = formatted;
             });
 
-            document.getElementById('formEntregador')?.addEventListener('submit', function(e) {
+            document.getElementById('formEntregador')?.addEventListener('submit', function (e) {
                 const nums = telefoneInput.value.replace(/\D/g, '');
                 if (nums.length !== 11) {
                     alert('Digite um número de celular válido com 11 dígitos.');
