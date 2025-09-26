@@ -236,16 +236,16 @@ $result = $stmt->get_result();
 
         <form method="post" action="entregas.php">
             <input type="text" name="nome" required placeholder="Nome"
-                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
 
             <input type="text" id="cep" name="cep" required placeholder="CEP"
-                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
             <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly
-                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
             <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly
-                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
             <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly
-                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#f7f7f7ff">
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
 
             <p>Entregador:</p>
             <select id="entregador_id" name="entregador_id" required
@@ -291,13 +291,13 @@ $result = $stmt->get_result();
                 <input type="hidden" name="novo_entregador" value="1">
 
                 <input type="text" name="nome_entregador" placeholder="Nome" required
-                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background: #e7e7e7ff">
 
                 <input type="email" name="email_entregador" placeholder="Email"
-                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+                    style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background: #e7e7e7ff">
 
                 <input type="text" name="telefone_entregador" id="telefone_entregador" placeholder="Telefone Celular"
-                    required style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background:#f7f7f7ff">
+                    required style="margin:5px 0;width:90%;padding:6px;border-radius:5px; border:0;background: #e7e7e7ff">
 
                 <button type="submit"
                     style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">
