@@ -261,11 +261,12 @@ $result = $stmt->get_result();
         <form method="post" action="entregas.php">
             <input type="text" name="nome" required placeholder="Nome"
                 style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
-
             <input type="text" id="cep" name="cep" required placeholder="CEP"
                 style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
             <input type="text" id="endereco" name="endereco" required placeholder="Endereço" readonly
                 style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+            <input type="text" name="referencia" id="referencia" placeholder="Referência (ex: Número do prédio, ponto de referência)"
+                style="margin:5px 0;width:90%;border-radius:5px;padding:6px;border:0;background:#e7e7e7ff">
             <input id="lat" name="lat" type="text" required placeholder="Latitude" readonly
                 style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
             <input id="lng" name="lng" type="text" required placeholder="Longitude" readonly
