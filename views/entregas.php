@@ -231,7 +231,6 @@ $result = $stmt->get_result();
                         <p><b>Status:</b> <?= htmlspecialchars($row['estado']) ?></p>
                         <?php if ($row['estado'] === 'Concluído'): ?>
                         <p><b>Data de Conclusão:</b> <?= date('d/m/Y', strtotime($row['data_entrega'])) ?></p>
-                        <p><b>Entrega Cancelada</b></p>
                         <?php elseif (!empty($row['data_entrega'])): ?>
                         <p><b>Data Agendada:</b> <?= date('d/m/Y', strtotime($row['data_entrega'])) ?></p>
                         <?php endif; ?>
