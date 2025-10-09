@@ -212,6 +212,22 @@ $result = $stmt->get_result();
                     <?= $row['estado'] === 'Cancelada' ? ' card-cancelada' : '' ?>">
                         <h3><?= htmlspecialchars($row['nome']) ?></h3>
                         <p><b>Endereço:</b> <?= htmlspecialchars($row['endereco']) ?></p>
+                        <p><b>Referência:</b> <?= htmlspecialchars($row['referencia'] ?: 'N/A') ?></p>
+                        <p><b>Entregador:</b>
+                            <?php
+                            $entregadorNome = 'N/A';
+                            if ($row['entregador_id']) {
+                                $stmtEnt = $conn->prepare("SELECT nome FROM entregadores WHERE id = ?");
+                                $stmtEnt->bind_param("i", $row['entregador_id']);
+                                $stmtEnt->execute();
+                                $resEnt = $stmtEnt->get_result();
+                                if ($resEnt->num_rows > 0) {
+                                    $entregadorNome = $resEnt->fetch_assoc()['nome'];
+                                }
+                                $stmtEnt->close();
+                            }
+                            echo htmlspecialchars($entregadorNome);
+                            ?>
                         <p><b>Status:</b> <?= htmlspecialchars($row['estado']) ?></p>
                         <?php if ($row['estado'] === 'Concluído'): ?>
                             <p><b>Data de Conclusão:</b> <?= htmlspecialchars($row['data_entrega']) ?></p>
