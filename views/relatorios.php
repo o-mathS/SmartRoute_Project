@@ -12,54 +12,129 @@ require_once '../backend/conexao.php';
   <link rel="stylesheet" href="../css/entregas.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin: 10px 0 24px;
-    }
-
-    .kpi-card {
-      background: #fff;
-      border: 1px solid #e9e9e9;
-      border-radius: 10px;
-      padding: 14px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .04);
-    }
-
-    .kpi-title {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 6px;
-    }
-
-    .kpi-value {
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .charts {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .chart-box {
-      background: #fff;
-      border: 1px solid #e9e9e9;
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    @media (max-width: 1100px) {
-      .charts {
-        grid-template-columns: 1fr;
+      body {
+        background: #f7f8fa;
       }
-
+      .main-content {
+        padding: 30px 40px;
+      }
       .kpis {
-        grid-template-columns: repeat(2, 1fr);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin: 18px 0 32px;
       }
-    }
+      .kpi-card {
+        background: linear-gradient(135deg, #f8fafc 80%, #e9e9e9 100%);
+        border: 1px solid #e3e3e3;
+        border-radius: 14px;
+        padding: 18px 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+      }
+      .kpi-title {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 8px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      .kpi-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a7a1a;
+        letter-spacing: 1px;
+      }
+      .charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        margin-bottom: 24px;
+      }
+      .chart-box {
+        background: #fff;
+        border: 1px solid #e3e3e3;
+        border-radius: 18px;
+        padding: 32px 24px 24px 24px;
+        box-shadow: 0 6px 24px rgba(0,0,0,.08);
+        min-height: 340px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: box-shadow 0.2s;
+      }
+      .chart-box:hover {
+        box-shadow: 0 12px 32px rgba(0,0,0,.12);
+      }
+      .chart-box h4 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        color: #1a7a1a;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+      .chart-box canvas {
+        width: 90% !important;
+        height: 220px !important;
+        max-width: 600px !important;
+        max-height: 220px !important;
+        margin: 0 auto;
+        background: #f7f8fa;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.07);
+        display: block;
+        border: 1px solid #e3e3e3;
+      }
+      #chartEntregador {
+        width: 98% !important;
+        height: 340px !important;
+        max-width: 900px !important;
+        max-height: 340px !important;
+      }
+      @media (max-width: 1100px) {
+        .main-content {
+          padding: 18px 6px;
+        }
+        .charts {
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+        .kpis {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        .chart-box {
+          min-height: 220px;
+          padding: 18px 6px 6px 6px;
+        }
+        .chart-box canvas {
+          height: 120px !important;
+          max-height: 120px !important;
+        }
+      }
+      @media (max-width: 700px) {
+        .main-content {
+          padding: 8px 2px;
+        }
+        .kpis {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .chart-box {
+          min-height: 120px;
+          padding: 8px 2px 2px 2px;
+        }
+        .chart-box canvas {
+          height: 60px !important;
+          max-height: 60px !important;
+        }
+      }
   </style>
 </head>
 
