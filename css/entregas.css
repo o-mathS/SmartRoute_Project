@@ -141,6 +141,11 @@ body {
   border-left: 6px solid #28a745 !important;
 }
 
+.card-concluida h3,
+.card-concluida p {
+  color: #155724 !important;
+}
+
 /* Ações dos cards */
 .card-actions {
   display: flex;
@@ -168,17 +173,17 @@ body {
 }
 
 .card-actions .concluir-btn {
-  background-color: #ade236;
+  background-color: #28a745;
   color: #fff;
 }
 
 .card-actions .remover-btn {
-  background-color: #d11a1a;
+  background-color: #cc0000;
   color: #fff;
 }
 
 .card-actions .editar-btn {
-  background-color: #f0ad4e;
+  background-color: #3fb1bb;
   color: #fff;
 }
 
