@@ -87,6 +87,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_id'])) {
     exit;
 }
 
+// --- Atualizar Entrega ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_id'])) {
+    $editarId = intval($_POST['editar_id']);
+    $nome = trim($_POST['editar_nome']);
+    $endereco = trim($_POST['editar_endereco']);
+    $lat = trim($_POST['editar_lat']);
+    $lng = trim($_POST['editar_lng']);
+    $dataEntrega = trim($_POST['editar_data_entrega']);
+    $entregador_id = intval($_POST['editar_entregador_id']);
+
+    if ($editarId && $nome && $endereco && $lat && $lng && $dataEntrega && $entregador_id) {
+        $stmt = $conn->prepare("UPDATE entregas SET nome=?, endereco=?, lat=?, lng=?, data_entrega=?, entregador_id=? WHERE id=?");
+        $stmt->bind_param("sssssii", $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id, $editarId);
+        $stmt->execute();
+        $stmt->close();
+        header("Location: entregas.php");
+        exit;
+    }
+}
+
 // --- Status selecionado ---
 $status = isset($_GET['status']) ? $_GET['status'] : 'Agendada';
 $stmt = $conn->prepare("SELECT * FROM entregas WHERE estado = ? ORDER BY id DESC");
@@ -211,6 +231,10 @@ $result = $stmt->get_result();
                                 <form method="post" style="display:inline;">
                                     <input type="hidden" name="concluir_id" value="<?= $row['id'] ?>" />
                                     <button type="submit" class="concluir-btn">Concluir</button>
+
+                                    <!-- Botão Editar Entrega -->
+                                    <button class="editar-btn" type="button" onclick='abrirEdicao(<?= json_encode($row) ?>)'>Editar</button>
+                                
                                 </form>
                             <?php endif; ?>
                         </div>
@@ -273,6 +297,47 @@ $result = $stmt->get_result();
                 echo "<div style='color:green;margin-top:5px;'>Operação realizada com sucesso!</div>"; ?>
         </form>
     </div>
+
+<!-- Modal Editar Entrega -->
+<div id="modalEditar" style="display:none;">
+    <h3>Editar Entrega</h3>
+    <form method="post" action="entregas.php">
+        <input type="hidden" name="editar_id" id="editar_id">
+
+        <input type="text" name="editar_nome" id="editar_nome" required placeholder="Nome"
+            style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+
+        <input type="text" name="editar_endereco" id="editar_endereco" required placeholder="Endereço"
+            style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+
+        <input type="text" name="editar_lat" id="editar_lat" required placeholder="Latitude" readonly
+            style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+
+        <input type="text" name="editar_lng" id="editar_lng" required placeholder="Longitude" readonly
+            style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+
+        <p>Entregador:</p>
+        <select id="editar_entregador_id" name="editar_entregador_id" required
+            style="margin:5px 0;width:100%;padding:6px;border-radius:5px;">
+            <option value="">Selecione...</option>
+            <?php
+            $resEdit = $conn->query("SELECT id, nome FROM entregadores ORDER BY nome");
+            while ($e2 = $resEdit->fetch_assoc()) {
+                echo "<option value='{$e2['id']}'>" . htmlspecialchars($e2['nome']) . "</option>";
+            }
+            ?>
+        </select>
+
+        <label>Data de Entrega:</label>
+        <input type="date" id="editar_data_entrega" name="editar_data_entrega"
+            style="margin:5px 0;width:90%;padding:6px;border-radius:5px;">
+
+        <button type="submit"
+            style="margin-top:10px;background-color:#1a7a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Salvar</button>
+        <button type="button" onclick="document.getElementById('modalEditar').style.display='none'"
+            style="background-color:#d11a1a;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:bold;">Cancelar</button>
+    </form>
+</div>
 
     <?php if ($usuarioRole === 'admin'): ?>
         <!-- Modal Novo Entregador -->
@@ -369,6 +434,18 @@ $result = $stmt->get_result();
             window.location.href = url;
         }
 
+        function abrirEdicao(entrega) {
+            document.getElementById('editar_id').value = entrega.id;
+            document.getElementById('editar_nome').value = entrega.nome;
+            document.getElementById('editar_endereco').value = entrega.endereco;
+            document.getElementById('editar_lat').value = entrega.lat;
+            document.getElementById('editar_lng').value = entrega.lng;
+            document.getElementById('editar_entregador_id').value = entrega.entregador_id || '';
+            document.getElementById('editar_data_entrega').value = entrega.data_entrega ? entrega.data_entrega.substring(0, 10) : '';
+            document.getElementById('modalEditar').style.display = 'block';
+      }
+
+
         // Máscara de telefone
         const telefoneInput = document.getElementById('telefone_entregador');
         if (telefoneInput) {
@@ -389,6 +466,7 @@ $result = $stmt->get_result();
                 }
             });
         }
+        
     </script>
 </body>
 
