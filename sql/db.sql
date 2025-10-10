@@ -38,4 +38,5 @@ ADD COLUMN entregador_id INT NULL,
 ADD FOREIGN KEY (entregador_id) REFERENCES entregadores(id);
 
 ALTER TABLE usuarios ADD COLUMN role ENUM('admin','user') DEFAULT 'user';
+ALTER TABLE entregas ADD COLUMN referencia VARCHAR(255) NULL;
 
