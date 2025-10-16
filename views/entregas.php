@@ -53,8 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nome'], $_POST['ender
     if (!$nome || !$endereco || !$lat || !$lng || !$dataEntrega || !$entregador_id) {
         $erro = 'Preencha todos os campos e selecione um entregador!';
     } else {
-        $stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, lat, lng, estado, data_entrega, entregador_id) VALUES (?, ?, ?, ?, "Agendada", ?, ?)');
-        $stmt->bind_param('sssssi', $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id);
+        $referencia = trim($_POST['referencia'] ?? '');
+
+$stmt = $conn->prepare('INSERT INTO entregas (nome, endereco, referencia, lat, lng, estado, data_entrega, entregador_id) VALUES (?, ?, ?, ?, ?, "Agendada", ?, ?)');
+$stmt->bind_param('ssssssi', $nome, $endereco, $referencia, $lat, $lng, $dataEntrega, $entregador_id);
+
         if ($stmt->execute()) {
             $sucesso = true;
             header("Location: entregas.php");
@@ -98,8 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_id'])) {
     $entregador_id = intval($_POST['editar_entregador_id']);
 
     if ($editarId && $nome && $endereco && $lat && $lng && $dataEntrega && $entregador_id) {
-        $stmt = $conn->prepare("UPDATE entregas SET nome=?, endereco=?, lat=?, lng=?, data_entrega=?, entregador_id=? WHERE id=?");
-        $stmt->bind_param("sssssii", $nome, $endereco, $lat, $lng, $dataEntrega, $entregador_id, $editarId);
+        $referenciaEditar = trim($_POST['editar_referencia'] ?? '');
+
+$stmt = $conn->prepare("UPDATE entregas SET nome=?, endereco=?, referencia=?, lat=?, lng=?, data_entrega=?, entregador_id=? WHERE id=?");
+$stmt->bind_param("ssssssii", $nome, $endereco, $referenciaEditar, $lat, $lng, $dataEntrega, $entregador_id, $editarId);
+
         $stmt->execute();
         $stmt->close();
         header("Location: entregas.php");
@@ -325,6 +331,9 @@ $result = $stmt->get_result();
         <input type="text" name="editar_endereco" id="editar_endereco" required placeholder="Endereço"
             style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
 
+            <input type="text" name="editar_referencia" id="editar_referencia" placeholder="Referência"
+    style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
+
         <input type="text" name="editar_lat" id="editar_lat" required placeholder="Latitude" readonly
             style="margin:5px 0;width:90%;border-radius:5px;padding:6px; border:0;background:#e7e7e7ff">
 
@@ -453,6 +462,7 @@ $result = $stmt->get_result();
             document.getElementById('editar_id').value = entrega.id;
             document.getElementById('editar_nome').value = entrega.nome;
             document.getElementById('editar_endereco').value = entrega.endereco;
+            document.getElementById('editar_referencia').value = entrega.referencia || '';
             document.getElementById('editar_lat').value = entrega.lat;
             document.getElementById('editar_lng').value = entrega.lng;
             document.getElementById('editar_entregador_id').value = entrega.entregador_id || '';
