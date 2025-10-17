@@ -6,20 +6,17 @@ body {
   display: flex;
   flex-direction: column;
 }
-
 header,
 footer {
   width: 100%;
   height: 32px;
   background: #27017d;
 }
-
 .main {
   flex: 1;
   display: flex;
   min-height: calc(100vh - 64px);
 }
-
 .left-panel {
   background: #ecebea;
   width: 420px;
@@ -28,49 +25,42 @@ footer {
   align-items: center;
   padding: 0 32px;
 }
-
 .logo-group {
   display: flex;
   align-items: center;
   margin-bottom: 32px;
 }
-
 .logo {
   width: 20vh;
   height: 20vh;
   margin-right: 18px;
 }
-
 .brand-text {
   font-size: 2.2rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #333;
   letter-spacing: 2px;
   line-height: 1.1;
 }
-
 .login-title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 18px;
   color: #222;
   text-align: center;
 }
-
 form {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 label {
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 4px;
   margin-top: 10px;
   color: #444;
 }
-
 input {
   margin-bottom: 14px;
   padding: 10px;
@@ -80,7 +70,6 @@ input {
   background: #f4f4f4;
   width: 70%;
 }
-
 button {
   padding: 12px;
   border: none;
@@ -89,51 +78,43 @@ button {
   border-radius: 4px;
   cursor: pointer;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 10px;
   width: 70%;
 }
-
 button:hover {
   background: #4c5d10;
 }
-
 .register-link {
   font-size: 0.95rem;
   text-align: center;
   margin-top: 8px;
   color: #444;
 }
-
 .register-link a {
   color: #7bbf32;
   text-decoration: underline;
   cursor: pointer;
 }
-
 .right-panel {
   flex: 1;
   position: relative;
   overflow: hidden;
 }
-
 .truck-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-
 @media (max-width: 900px) {
   .main {
     flex-direction: column;
   }
-
   .left-panel {
     width: 100%;
     min-width: 0;
   }
-
   .right-panel {
     display: none;
   }
@@ -141,11 +122,10 @@ button:hover {
 .login-error {
   color: red;
   margin-top: 10px;
-  font-weight: bold;
+  font-weight: 700;
 }
-
 .register-link a {
   color: #8caa26;
   text-decoration: underline;
-  font-weight: bold;
+  font-weight: 700;
 }

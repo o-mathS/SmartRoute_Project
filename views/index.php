@@ -8,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['loginUsuario'], $_POS
     $usuario = trim($_POST['loginUsuario']);
     $senha   = $_POST['loginSenha'];
 
-    // Query corrigida para trazer a role
     $stmt = $conn->prepare("SELECT id, senha, role FROM usuarios WHERE usuario = ?");
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
@@ -18,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['loginUsuario'], $_POS
     if ($user && password_verify($senha, $user['senha'])) {
         $_SESSION['usuario_id']   = $user['id'];
         $_SESSION['usuario_nome'] = $usuario;
-        $_SESSION['usuario_role'] = $user['role']; // agora vai pegar corretamente
+        $_SESSION['usuario_role'] = $user['role']; 
         header("Location: entregas.php");
         exit;
     } else {

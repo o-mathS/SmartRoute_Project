@@ -137,21 +137,6 @@ $result = $stmt->get_result();
 <body>
     <!-- Popup de boas-vindas -->
     <?php if (isset($_SESSION['usuario_nome'])): ?>
-        <style>
-            #welcome-popup {
-                background: #fff;
-                padding: 7px 16px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-                font-size: 1rem;
-                font-family: 'Sofia Sans', sans-serif;
-                min-width: 120px;
-                max-width: 200px;
-                text-align: center;
-                margin: 18px auto 8px auto;
-                display: block;
-            }
-        </style>
     <?php endif; ?>
 
     <div class="top-bar"></div>
