@@ -1,4 +1,21 @@
 <?php
+// --- Inclui a conexão de forma segura ---
+require_once(__DIR__ . '/backend/conexao.php');
+
+// --- Teste de conexão opcional ---
+if (!$conn) {
+    die("Erro: conexão com o banco não estabelecida.");
+}
+
+// --- Exemplo de uso ---
+$result = $conn->query("SELECT NOW() as data");
+if ($result) {
+    $row = $result->fetch_assoc();
+    echo "Banco conectado em: " . $row['data'];
+}
+
+$conn->close();
+
 session_start();
 include_once '../backend/conexao.php';
 
@@ -6,18 +23,18 @@ $loginErro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['loginUsuario'], $_POST['loginSenha'])) {
     $usuario = trim($_POST['loginUsuario']);
-    $senha   = $_POST['loginSenha'];
+    $senha = $_POST['loginSenha'];
 
     $stmt = $conn->prepare("SELECT id, senha, role FROM usuarios WHERE usuario = ?");
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user   = $result->fetch_assoc();
+    $user = $result->fetch_assoc();
 
     if ($user && password_verify($senha, $user['senha'])) {
-        $_SESSION['usuario_id']   = $user['id'];
+        $_SESSION['usuario_id'] = $user['id'];
         $_SESSION['usuario_nome'] = $usuario;
-        $_SESSION['usuario_role'] = $user['role']; 
+        $_SESSION['usuario_role'] = $user['role'];
         header("Location: entregas.php");
         exit;
     } else {
@@ -30,12 +47,14 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>SmartRoute - Login</title>
     <link rel="stylesheet" href="../css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
     <header></header>
     <div class="main">
@@ -67,4 +86,5 @@ $conn->close();
     </div>
     <footer></footer>
 </body>
+
 </html>
