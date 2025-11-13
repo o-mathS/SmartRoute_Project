@@ -1,6 +1,6 @@
 <?php
 // Caminho para o index real dentro do projeto
-$mainIndex = __DIR__ . '/SmartRoute_Project/views/index.php';
+$mainIndex = __DIR__ . '/views/index.php';
 
 // Verifica se o arquivo existe antes de incluir
 if (file_exists($mainIndex)) {
