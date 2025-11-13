@@ -1,13 +1,12 @@
-
 <?php
 // --- Caminho absoluto seguro ---
 $rootPath = __DIR__;
 
 // --- Configurações do banco ---
-$servername = "devgom44_sapoeslight";
+$servername = "localhost"; // <- Host correto no cPanel
 $username   = "devgom44_sapoeslight";
 $password   = "sapoeslight@1234!";
-$dbname     = "smartroute";
+$dbname     = "devgom44_smartroute"; // <- provavelmente o banco correto tem prefixo igual ao usuário
 
 // --- Conexão ---
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -20,7 +19,4 @@ if ($conn->connect_error) {
 
 // --- Define charset UTF-8 ---
 $conn->set_charset("utf8mb4");
-
-// --- (Opcional) Confirma a conexão em ambiente de teste ---
-// echo "Conectado com sucesso!";
 ?>
