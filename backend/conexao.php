@@ -4,9 +4,9 @@
 $rootPath = __DIR__;
 
 // --- Configurações do banco ---
-$servername = "localhost";
-$username   = "root";
-$password   = "Home@spSENAI2025!";
+$servername = "devgom44_sapoeslight";
+$username   = "devgom44_sapoeslight";
+$password   = "sapoeslight@1234!";
 $dbname     = "smartroute";
 
 // --- Conexão ---
