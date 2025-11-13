@@ -1,24 +1,16 @@
 <?php
-// --- Inclui a conexão de forma segura ---
+// --- Inicia sessão ---
+session_start();
+
+// --- Conexão segura ---
 require_once(__DIR__ . '/backend/conexao.php');
 
-// --- Teste de conexão opcional ---
+// --- Teste simples de conexão (opcional, pode remover depois) ---
 if (!$conn) {
     die("Erro: conexão com o banco não estabelecida.");
 }
 
-// --- Exemplo de uso ---
-$result = $conn->query("SELECT NOW() as data");
-if ($result) {
-    $row = $result->fetch_assoc();
-    echo "Banco conectado em: " . $row['data'];
-}
-
-$conn->close();
-
-session_start();
-include_once '/backend/conexao.php';
-
+// --- Lógica de login ---
 $loginErro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['loginUsuario'], $_POST['loginSenha'])) {
@@ -43,24 +35,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['loginUsuario'], $_POS
 
     $stmt->close();
 }
+
 $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <title>SmartRoute - Login</title>
-    <link rel="stylesheet" href="/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <header></header>
     <div class="main">
         <div class="left-panel">
             <div class="logo-group">
-                <img src="/assets/img/logo.png" alt="Smart Route Logo" class="logo">
+                <img src="assets/img/logo.png" alt="Smart Route Logo" class="logo">
             </div>
             <div class="login-title">Log In</div>
 
@@ -81,10 +72,8 @@ $conn->close();
         </div>
 
         <div class="right-panel">
-            <img src="/assets/img/truck2.webp" alt="Caminhão" class="truck-img">
+            <img src="assets/img/truck2.webp" alt="Caminhão" class="truck-img">
         </div>
     </div>
-    <footer></footer>
 </body>
-
 </html>
